@@ -52,7 +52,7 @@ export class AuthService {
   private token: string | null = null;
   private refreshToken: string | null = null;
   private user: AuthUser | null = null;
-  private readonly baseUrl = "https://api.homobie.com/";
+  private readonly baseUrl = "https://api.homobie.com";
   private tokenRefreshPromise: Promise<void> | null = null;
 
   constructor() {
