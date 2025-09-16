@@ -14,7 +14,7 @@ type ApiRequestOptions = {
 
 type UnauthorizedBehavior = "returnNull" | "throw" | "logout";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://homobie.ap-south-1.elasticbeanstalk.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.homobie.com/';
 
 /**
  * CORS-aware API request function
