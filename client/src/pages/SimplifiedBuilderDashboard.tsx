@@ -33,7 +33,7 @@ import { EnhancedAssignLeadDialog } from "@/components/dashboard/EnhancedAssignL
 import { CreateTeam } from "@/components/dashboard/CreateTeam";
 
 // --- API and Types ---
-const API_BASE_URL = "http://homobie.ap-south-1.elasticbeanstalk.com";
+const API_BASE_URL = "https://homobie.ap-south-1.elasticbeanstalk.com";
 
 // Types matching backend DTOs
 interface LocationResponse {
