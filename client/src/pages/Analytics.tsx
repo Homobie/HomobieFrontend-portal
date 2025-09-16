@@ -48,14 +48,23 @@ interface MonthlyUsersData {
   count: number;
 }
 
-const BASE_URL = "https://homobiebackend-railway-production.up.railway.app";
+const BASE_URL = "https://api.homobie.com";
 
 // Updated based on backend enum values from error messages
-const STATUS_OPTIONS = ["PENDING", "CONTACTED", "QUALIFIED", "CONVERTED", "REJECTED", "NO_LOANS"];
+const STATUS_OPTIONS = [
+  "PENDING",
+  "CONTACTED",
+  "QUALIFIED",
+  "CONVERTED",
+  "REJECTED",
+  "NO_LOANS",
+];
 const ROLE_OPTIONS = ["ADMIN", "BUILDER", "BROKER", "USER"]; // Updated to uppercase based on error
 
 const getToken = () => {
-  return localStorage.getItem("auth_token") || localStorage.getItem("token") || "";
+  return (
+    localStorage.getItem("auth_token") || localStorage.getItem("token") || ""
+  );
 };
 
 export default function Analytics() {
@@ -83,7 +92,9 @@ export default function Analytics() {
       );
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to fetch total and average data");
+        throw new Error(
+          error.message || "Failed to fetch total and average data"
+        );
       }
       return response.json();
     },
@@ -91,23 +102,25 @@ export default function Analytics() {
 
   // Fetch leads count by status - requires status parameter
   const { data: leadsCountByStatus } = useQuery<LeadsCountByStatus>({
-  queryKey: ["leadsCountByStatus", dateRange], // Removed selectedStatus from queryKey since we're hardcoding it
-  queryFn: async () => {
-    const params = new URLSearchParams();
-    params.append("status", "NEW"); // Hardcoded to always request NEW status
-    if (dateRange.from) params.append("from", dateRange.from.toISOString());
-    if (dateRange.to) params.append("to", dateRange.to.toISOString());
+    queryKey: ["leadsCountByStatus", dateRange], // Removed selectedStatus from queryKey since we're hardcoding it
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("status", "NEW"); // Hardcoded to always request NEW status
+      if (dateRange.from) params.append("from", dateRange.from.toISOString());
+      if (dateRange.to) params.append("to", dateRange.to.toISOString());
 
-    const response = await authenticatedFetch(
-      `${BASE_URL}/analytics/getLeadsCountByStatus?${params.toString()}`
-    );
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to fetch leads count by status");
-    }
-    return response.json();
-  },
-});
+      const response = await authenticatedFetch(
+        `${BASE_URL}/analytics/getLeadsCountByStatus?${params.toString()}`
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(
+          error.message || "Failed to fetch leads count by status"
+        );
+      }
+      return response.json();
+    },
+  });
 
   // Fetch total active users - works correctly
   const { data: totalActiveUsers } = useQuery<ActiveUsersData>({
@@ -126,27 +139,28 @@ export default function Analytics() {
 
   // Fetch monthly users by role - works correctly
   // In your monthly users by role query, ensure the response is always treated as an array
-const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
-  queryKey: ["monthlyUsersByRole", selectedRole, dateRange],
-  queryFn: async () => {
-    const params = new URLSearchParams();
-    params.append("role", selectedRole);
-    if (dateRange.from) params.append("from", dateRange.from.toISOString());
-    if (dateRange.to) params.append("to", dateRange.to.toISOString());
+  const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
+    queryKey: ["monthlyUsersByRole", selectedRole, dateRange],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("role", selectedRole);
+      if (dateRange.from) params.append("from", dateRange.from.toISOString());
+      if (dateRange.to) params.append("to", dateRange.to.toISOString());
 
-    const response = await authenticatedFetch(
-      `${BASE_URL}/analytics/count-monthly-users-by-role?${params.toString()}`
-    );
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to fetch monthly users by role");
-    }
-    const data = await response.json();
-    // Ensure we always return an array, even if the API returns something else
-    return Array.isArray(data) ? data : [];
-  },
-});
-
+      const response = await authenticatedFetch(
+        `${BASE_URL}/analytics/count-monthly-users-by-role?${params.toString()}`
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(
+          error.message || "Failed to fetch monthly users by role"
+        );
+      }
+      const data = await response.json();
+      // Ensure we always return an array, even if the API returns something else
+      return Array.isArray(data) ? data : [];
+    },
+  });
 
   // Fetch active users by role - requires role parameter in uppercase
   const { data: activeUsersByRole } = useQuery<ActiveUsersData>({
@@ -160,7 +174,9 @@ const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
       );
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to fetch active users by role");
+        throw new Error(
+          error.message || "Failed to fetch active users by role"
+        );
       }
       return response.json();
     },
@@ -186,7 +202,8 @@ const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
     }
   };
 
-  const isLoading = !totalAndAverageData || !leadsCountByStatus || !totalActiveUsers;
+  const isLoading =
+    !totalAndAverageData || !leadsCountByStatus || !totalActiveUsers;
 
   if (isLoading) {
     return (
@@ -266,7 +283,8 @@ const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
           </SelectContent>
         </Select>
         <div className="text-lg font-semibold">
-          {leadsCountByStatus?.[selectedStatus] || 0} leads with status "{selectedStatus}"
+          {leadsCountByStatus?.[selectedStatus] || 0} leads with status "
+          {selectedStatus}"
         </div>
       </div>
 
@@ -305,9 +323,7 @@ const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average Value
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Average Value</CardTitle>
             <FileText className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -354,44 +370,52 @@ const { data: monthlyUsersByRole } = useQuery<MonthlyUsersData[]>({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {leadsCountByStatus && Object.entries(leadsCountByStatus).map(
-                ([status, count]) => (
-                  <div key={status} className="flex items-center justify-between">
+              {leadsCountByStatus &&
+                Object.entries(leadsCountByStatus).map(([status, count]) => (
+                  <div
+                    key={status}
+                    className="flex items-center justify-between"
+                  >
                     <Badge variant="outline" className="capitalize">
                       {status}
                     </Badge>
                     <span className="font-semibold">{count}</span>
                   </div>
-                )
-              )}
+                ))}
             </div>
           </CardContent>
         </Card>
 
         {/* Monthly Users by Role */}
         <Card>
-  <CardHeader>
-    <CardTitle>Monthly Users ({selectedRole})</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="space-y-3">
-      {Array.isArray(monthlyUsersByRole) && monthlyUsersByRole.length > 0 ? (
-        monthlyUsersByRole.map((month) => (
-          <div key={month.month} className="flex items-center justify-between">
-            <span className="text-sm font-medium">{month.month}</span>
-            <div className="text-right">
-              <div className="text-sm font-semibold">
-                {month.count} users
-              </div>
+          <CardHeader>
+            <CardTitle>Monthly Users ({selectedRole})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.isArray(monthlyUsersByRole) &&
+              monthlyUsersByRole.length > 0 ? (
+                monthlyUsersByRole.map((month) => (
+                  <div
+                    key={month.month}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-sm font-medium">{month.month}</span>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold">
+                        {month.count} users
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500">
+                  No monthly user data available
+                </div>
+              )}
             </div>
-          </div>
-        ))
-      ) : (
-        <div className="text-sm text-gray-500">No monthly user data available</div>
-      )}
-    </div>
-  </CardContent>
-</Card>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import { authService } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import HomobieLogo from "/attached_assets/wmremove-transformed_-_Edited-removebg-preview.png";
+import OAuth from "./OAuth";
 
 type UserRole =
   | "super_admin"
@@ -338,7 +339,9 @@ export default function GlassLogin() {
                 )}
               </GlassButton>
             </div>
+                <OAuth/>
           </motion.form>
+       
 
           {/* Sign Up Link */}
           <motion.div

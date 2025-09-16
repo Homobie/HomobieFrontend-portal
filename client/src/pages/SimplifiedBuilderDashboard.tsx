@@ -33,7 +33,7 @@ import { EnhancedAssignLeadDialog } from "@/components/dashboard/EnhancedAssignL
 import { CreateTeam } from "@/components/dashboard/CreateTeam";
 
 // --- API and Types ---
-const API_BASE_URL = "https://homobiebackend-railway-production.up.railway.app";
+const API_BASE_URL = "https://api.homobie.com";
 
 // Types matching backend DTOs
 interface LocationResponse {

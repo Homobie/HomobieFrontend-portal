@@ -14,7 +14,7 @@ import { authService } from "@/lib/auth";
 import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 
 // --- Define your API Base URL ---
-const API_BASE_URL = "https://homobiebackend-railway-production.up.railway.app";
+const API_BASE_URL = "https://api.homobie.com";
 
 // Define a type for our document object for better type safety
 type pdf = "pdf";
@@ -133,10 +133,10 @@ export function FileUploadPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Data Upload 
+              Upload Documents 
             </h1>
             <p className="text-gray-400 mt-2">
-              Upload your standard documents and master data files.
+              Upload your standard documents and master documents.
             </p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export function FileUploadPage() {
           />
           <FileUploader
             title="Master File Upload"
-            description="Upload master data files, typically in PDF format."
+            description="Upload master document files, typically in PDF format."
             icon={<Sheet className="w-10 h-10 text-emerald-400" />}
             onFileUpload={(file) => handleFileUpload(file, "MASTER")}
           />

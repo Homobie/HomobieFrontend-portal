@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://homobiebackend-railway-production.up.railway.app', // Your backend server
+        target: 'https://api.homobie.com', // Your backend server
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/auth/, ''),
       },
