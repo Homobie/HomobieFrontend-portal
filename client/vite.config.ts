@@ -17,7 +17,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://homobie.ap-south-1.elasticbeanstalk.com', // Your backend server
+
+        target: 'https://api.homobie.com', // Your backend server
+
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/auth/, ''),
       },

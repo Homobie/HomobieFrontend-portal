@@ -42,6 +42,8 @@ import TelecallerManagement from "@/pages/TelecallerManagement";
 import BankManagement from "@/pages/BankManagement";
 import NotificationCenter from "@/pages/NotificationCenter";
 import AssignmentManagement from "@/pages/AssignmentManagement";
+import CallbackPage from "@/hooks/CallbackPage";
+import CompleteProfile from "@/pages/CompleteProfile";
 
 /**
  * Protected layout (with navbar, background, newsletter, chatbot, etc.)
@@ -268,6 +270,15 @@ function AppRouter() {
           <Settings />
         </ProtectedLayout>
       </Route>
+      <Route path="/complete-profile">
+        {() => {
+          const searchParams = new URLSearchParams(window.location.search);
+          const email = searchParams.get("email") || "";
+          const firstName = searchParams.get("firstName") || "";
+          return <CompleteProfile email={email} firstName={firstName} />;
+        }}
+      </Route>
+      <Route path="/auth/callback" component={CallbackPage} />
 
       {/* Root redirect */}
       <Route path="/">

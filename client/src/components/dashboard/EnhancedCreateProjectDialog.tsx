@@ -150,6 +150,7 @@ export function EnhancedCreateProjectDialog({
   const [activeTab, setActiveTab] = useState("project");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
 
   const projectForm = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
@@ -276,93 +277,65 @@ export function EnhancedCreateProjectDialog({
   });
 
   const createLeadMutation = useMutation({
-    mutationFn: async (newLeadData: CreateLeadFormData) => {
-      const currentUserId = getUserId();
-      const currentToken = getToken();
-      if (!currentUserId || !currentToken) {
-        throw new Error("User not authenticated. Please log in again.");
-      }
-      const dto: CreateLeadDTO = {
-        user: {
-          firstName: newLeadData.firstName,
-          lastName: newLeadData.lastName,
-          email: newLeadData.email,
-          phoneNumber: newLeadData.phoneNumber,
+  mutationFn: async (newLeadData: CreateLeadFormData) => {
+    const currentUserId = getUserId();
+    const currentToken = getToken();
+    if (!currentUserId || !currentToken) {
+      throw new Error("User not authenticated. Please log in again.");
+    }
+    const dto: CreateLeadDTO = {
+      user: {
+        firstName: newLeadData.firstName,
+        lastName: newLeadData.lastName,
+        email: newLeadData.email,
+        phoneNumber: newLeadData.phoneNumber,
+      },
+      roleData: {
+        roleType: "USER",
+        addedByUserId: currentUserId,
+        location: {
+          country: newLeadData.country,
+          state: newLeadData.state,
+          city: newLeadData.city,
+          pincode: newLeadData.pincode,
+          addressLine1: newLeadData.addressLine1,
         },
-        roleData: {
-          roleType: "USER",
-          addedByUserId: currentUserId,
-          location: {
-            country: newLeadData.country,
-            state: newLeadData.state,
-            city: newLeadData.city,
-            pincode: newLeadData.pincode,
-            addressLine1: newLeadData.addressLine1,
-          },
-        },
-      };
-      return await apiRequest<CreateLeadDTO>("/register/user", {
-        method: "POST",
-        body: dto,
-        headers: { Authorization: `Bearer ${currentToken}` },
-      });
-    },
-    onSuccess: async (response, variables) => {
-      // Close dialog first
-      onOpenChange(false);
+      },
+    };
+    return await apiRequest<CreateLeadDTO>("/register/user", {
+      method: "POST",
+      body: dto,
+      headers: { Authorization: `Bearer ${currentToken}` },
+    });
+  },
+  onSuccess: () => {
+    const currentUserId = getUserId();
+    
+    // Close dialog
+    onOpenChange(false);
+    
+    // Invalidate the leads cache - this will trigger a refetch
+    if (currentUserId) {
+      queryClient.invalidateQueries({ queryKey: ["leads", currentUserId] });
+    }
 
-      try {
-        // Get current user details
-        const currentUserId = getUserId();
-        const currentToken = getToken();
+    // Show success toast
+    toast({
+      title: "Success",
+      description: "Lead created successfully!",
+    });
 
-        if (currentUserId && currentToken) {
-          // Call the leads GET API to fetch updated leads
-          const updatedLeads = await apiRequest(
-            `https://api.homobie.com/leads/get/${currentUserId}`,
-            {
-              method: "GET",
-              headers: {
-  "Authorization": `Bearer ${currentToken}`,
-  "Content-Type": "application/json", 
-}
-            }
-          );
-
-          // Update the cache with the exact same query key your leads component uses
-          queryClient.setQueryData(
-            ["builderLeads", currentUserId],
-            updatedLeads
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching updated leads:", error);
-        // Fallback to invalidation if direct API call fails
-        const currentUserId = getUserId();
-        if (currentUserId) {
-          queryClient.invalidateQueries({
-            queryKey: ["builderLeads", currentUserId],
-          });
-        }
-      }
-
-      // Show success toast
-      toast({
-        title: "Success",
-        description: "Lead created successfully!",
-      });
-
-      // Reset form
-      leadForm.reset();
-    },
-    onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || "Failed to create lead",
-        variant: "destructive",
-      });
-    },
-  });
+    // Reset form
+    leadForm.reset();
+  },
+  onError: (err: any) => {
+    toast({
+      title: "Error",
+      description: err.message || "Failed to create lead",
+      variant: "destructive",
+    });
+  },
+});
 
   const onProjectSubmit = (data: CreateProjectFormData) => {
     createProjectMutation.mutate(data);

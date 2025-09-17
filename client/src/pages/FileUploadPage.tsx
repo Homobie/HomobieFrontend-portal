@@ -255,11 +255,13 @@ export function FileUploadPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white via-gray-300 to-gray-500 bg-clip-text text-transparent">
-              Document Management
+
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              Upload Documents 
             </h1>
             <p className="text-gray-400 mt-2">
-              Upload, download, and manage your documents with ease.
+              Upload your standard documents and master documents.
+
             </p>
           </div>
         </div>
@@ -287,7 +289,7 @@ export function FileUploadPage() {
           />
           <FileUploader
             title="Master File Upload"
-            description="Upload master data files, typically in PDF format."
+            description="Upload master document files, typically in PDF format."
             icon={<Sheet className="w-10 h-10 text-emerald-400" />}
             onFileUpload={(file) => handleFileUpload(file, "MASTER")}
             accept=".pdf"

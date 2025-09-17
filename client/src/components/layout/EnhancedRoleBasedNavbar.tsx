@@ -69,8 +69,8 @@ export function EnhancedRoleBasedNavbar({
         return [
           { path: "/builder", label: "Builder Portal", icon: Building2 },
           { path: "/leads", label: "Lead Management", icon: Target },
-{ path: "/analytics", label: "Analytics", icon: BarChart3 },
-          { path: "/upload", label: "Upload Data", icon: Upload },
+          { path: "/analytics", label: "Analytics", icon: BarChart3 },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "telecaller":
@@ -78,7 +78,7 @@ export function EnhancedRoleBasedNavbar({
           { path: "/telecaller", label: "Telecaller Portal", icon: Phone },
           { path: "/leads", label: "My Leads", icon: Target },
           { path: "/analytics", label: "Analytics", icon: BarChart3 },
-          { path: "/upload", label: "Upload Data", icon: Upload },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "ca":
@@ -86,7 +86,7 @@ export function EnhancedRoleBasedNavbar({
           { path: "/ca", label: "CA Dashboard", icon: Calculator },
           { path: "/leads", label: "Applications", icon: FileText },
           { path: "/analytics", label: "Analytics", icon: BarChart3 },
-          { path: "/upload", label: "Upload Data", icon: FileText },
+          { path: "/upload", label: "Upload Docs", icon: FileText },
           ...baseItems,
         ];
       case "broker":
@@ -94,7 +94,7 @@ export function EnhancedRoleBasedNavbar({
           { path: "/broker", label: "Broker Portal", icon: Briefcase },
           { path: "/leads", label: "Client Management", icon: Users },
           { path: "/analytics", label: "Analytics", icon: BarChart3 },
-          { path: "/upload", label: "Upload Data", icon: Upload },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "admin":
@@ -106,21 +106,21 @@ export function EnhancedRoleBasedNavbar({
           { path: "/leads", label: "All Leads", icon: Target },
           { path: "/analytics", label: "Analytics", icon: BarChart3 },
           { path: "/audit", label: "Audit Logs", icon: FileText },
-          { path: "/upload", label: "Upload Data", icon: Upload },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "user":
         return [
           { path: "/dashboard", label: "Dashboard", icon: Home },
           // { path: "/leads", label: "My Leads", icon: Target },
-          { path: "/upload", label: "Upload Data", icon: Upload },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       default:
         return [
           { path: "/dashboard", label: "Dashboard", icon: Home },
           // { path: "/leads", label: "My Leads", icon: Target },
-          // { path: "/upload", label: "Upload Data", icon: Upload },
+          // { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
     }
