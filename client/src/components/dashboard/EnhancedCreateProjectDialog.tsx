@@ -150,6 +150,7 @@ export function EnhancedCreateProjectDialog({
   const [activeTab, setActiveTab] = useState("project");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
 
   const projectForm = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),

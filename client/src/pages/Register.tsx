@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import HomobieLogo from "/attached_assets/wmremove-transformed_-_Edited-removebg-preview.png";
-
+import { Country, State, City } from "country-state-city";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.homobie.com';
 
@@ -399,52 +399,91 @@ export default function Register() {
                 transition={{ duration: 0.5 }}
                 className="space-y-4"
               >
-                {/* MODIFICATION: Removed the old Company Name field from this step */}
+                {/* Country, State, City Selects */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Country
                     </label>
-                    <Input
-                      type="text"
-                      name="country"
+                    <Select
                       value={formData.country}
-                      onChange={handleChange}
-                      placeholder="Country"
-                      className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
-                    />
+                      onValueChange={(value) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          country: value,
+                          state: "",
+                          city: ""
+                        }));
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm">
+                        <SelectValue placeholder="Select Country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Country.getAllCountries().map((c) => (
+                          <SelectItem key={c.isoCode} value={c.isoCode}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       State
                     </label>
-                    <Input
-                      type="text"
-                      name="state"
+                    <Select
                       value={formData.state}
-                      onChange={handleChange}
-                      placeholder="State"
-                      className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
-                    />
+                      onValueChange={(value) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          state: value,
+                          city: ""
+                        }));
+                      }}
+                      disabled={!formData.country}
+                    >
+                      <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm">
+                        <SelectValue placeholder="Select State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {State.getStatesOfCountry(formData.country).map((s) => (
+                          <SelectItem key={s.isoCode} value={s.isoCode}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      City
-                    </label>
-                    <Input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder="City"
-                      className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    City
+                  </label>
+                  <Select
+                    value={formData.city}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, city: value }))
+                    }
+                    disabled={!formData.state}
+                  >
+                    <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm">
+                      <SelectValue placeholder="Select City" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {City.getCitiesOfState(formData.country, formData.state).map((ct) => (
+                        <SelectItem key={ct.name} value={ct.name}>
+                          {ct.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
+                {/* Pincode and Address Line 1 remain unchanged */}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Pincode

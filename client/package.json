@@ -52,6 +52,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
+    "country-state-city": "^3.2.1",
     "css": "^3.0.0",
     "date-fns": "^3.6.0",
     "dom": "^0.0.3",
