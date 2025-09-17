@@ -144,7 +144,7 @@ export default function LeadManagement() {
 
   // ### Mutations (Update and Delete) - COMMENTED OUT ###
   // NOTE: These mutations require corresponding PUT and DELETE endpoints in your LeadController.
-  /*
+  
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, data }: { leadId: string; data: UpdateLeadFormData }) => {
       const token = localStorage.getItem("auth_token") || "";
@@ -182,7 +182,7 @@ export default function LeadManagement() {
       toast({ title: "Error", description: error.message || "Failed to delete lead.", variant: "destructive" });
     },
   });
-  */
+  
 
   // ### Form Handling ###
   const editForm = useForm<UpdateLeadFormData>({

@@ -204,44 +204,47 @@ export function FileUploadPage() {
     }
   };
 
-  // --- API CALL TO DELETE FILE ---
   const handleFileDelete = async (fileId: string) => {
-    if (!fileId || !userId) {
-      alert("Cannot delete file: Missing required information.");
-      return;
-    }
+  if (!fileId || !userId) {
+    alert("Cannot delete file: Missing required information.");
+    return;
+  }
 
-    const confirmDelete = window.confirm("Are you sure you want to delete this file?");
-    if (!confirmDelete) return;
+  const confirmDelete = window.confirm("Are you sure you want to delete this file?");
+  if (!confirmDelete) return;
 
-    setDeletingFileId(fileId);
+  setDeletingFileId(fileId);
+
+  try {
     const token = getToken();
-
-    try {
-      await axios.delete(`${API_BASE_URL}/document/delete`, {
-        params: {
-          fileId,
-          userId,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      alert("File deleted successfully!");
-      fetchDocuments(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting file:", error);
-      let errorMessage = "Delete failed.";
-      if (axios.isAxiosError(error) && error.response) {
-        errorMessage = error.response.data || "Delete failed.";
-      }
-      alert("Error: " + errorMessage);
-    } finally {
-      setDeletingFileId(null);
+    if (!token) {
+      throw new Error("No authentication token found");
     }
-  };
 
+    // path parameters instead of query params
+const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`, {
+  params: { userId },
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+    alert("File deleted successfully!");
+    fetchDocuments();
+  } catch (error: unknown) {
+    console.error("Error deleting file:", error);
+    let errorMessage = "Delete failed.";
+    
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error details:', error.response);
+      errorMessage = error.response?.data?.message || error.response?.data || error.message || "Delete failed.";
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    alert("Error: " + errorMessage);
+  } finally {
+    setDeletingFileId(null);
+  }
+};
   // --- RENDER ---
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-4 sm:p-6 lg:p-8 pt-28">
