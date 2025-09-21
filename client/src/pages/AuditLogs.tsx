@@ -17,7 +17,7 @@ export default function AuditLogs() {
   const [resourceTypeFilter, setResourceTypeFilter] = useState<string>("all");
   const { canViewAuditLogs } = useRoleAccess();
 
-  // Redirect if no permission
+  // Redirect if no permission //
   if (!canViewAuditLogs) {
     return (
       <div className="min-h-screen flex items-center justify-center">
