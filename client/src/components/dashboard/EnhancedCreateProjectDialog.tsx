@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Country, State, City } from "country-state-city";
 import { z } from "zod";
 import {
   Building2,
@@ -148,6 +149,14 @@ export function EnhancedCreateProjectDialog({
   onOpenChange,
 }: EnhancedCreateProjectDialogProps) {
   const [activeTab, setActiveTab] = useState("project");
+  const [selectedCountry, setSelectedCountry] = useState("IN");
+const [selectedState, setSelectedState] = useState("");
+
+const statesList = State.getStatesOfCountry(selectedCountry);
+
+const citiesList = selectedState
+  ? City.getCitiesOfState(selectedCountry, selectedState)
+  : [];
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -621,53 +630,64 @@ export function EnhancedCreateProjectDialog({
                               )}
                             />
                             <FormField
-                              control={projectForm.control}
-                              name="city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    City
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="e.g., Mumbai"
-                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={projectForm.control}
-                              name="state"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    State
-                                  </FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                        <SelectValue placeholder="Select state" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {indianStates.map((state) => (
-                                        <SelectItem key={state} value={state}>
-                                          {state}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+  control={projectForm.control}
+  name="state"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">State</FormLabel>
+      <Select
+        onValueChange={(val) => {
+          field.onChange(val);
+          setSelectedState(val); // update state for city dropdown
+        }}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select state" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {statesList.map((state) => (
+            <SelectItem key={state.isoCode} value={state.isoCode}>
+              {state.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={projectForm.control}
+  name="city"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">City</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select city" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {citiesList.map((city) => (
+            <SelectItem key={city.name} value={city.name}>
+              {city.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                             <FormField
                               control={projectForm.control}
                               name="pincode"
@@ -861,53 +881,64 @@ export function EnhancedCreateProjectDialog({
                                 )}
                               />
                               <FormField
-                                control={leadForm.control}
-                                name="state"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-white">
-                                      State
-                                    </FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                          <SelectValue placeholder="Select state" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {indianStates.map((state) => (
-                                          <SelectItem key={state} value={state}>
-                                            {state}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={leadForm.control}
-                                name="city"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-white">
-                                      City
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="e.g., Bhopal"
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+  control={leadForm.control}
+  name="state"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">State</FormLabel>
+      <Select
+        onValueChange={(val) => {
+          field.onChange(val);
+          setSelectedState(val);
+        }}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select state" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {statesList.map((state) => (
+            <SelectItem key={state.isoCode} value={state.isoCode}>
+              {state.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={leadForm.control}
+  name="city"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">City</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select city" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {citiesList.map((city) => (
+            <SelectItem key={city.name} value={city.name}>
+              {city.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                               <FormField
                                 control={leadForm.control}
                                 name="pincode"

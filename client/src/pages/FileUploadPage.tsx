@@ -33,18 +33,18 @@ interface Document {
 const validatePDF = (file: File): { isValid: boolean; error?: string } => {
   // Check file type
   if (file.type !== "application/pdf") {
-    return { 
-      isValid: false, 
-      error: "Only PDF files are allowed." 
+    return {
+      isValid: false,
+      error: "Only PDF files are allowed.",
     };
   }
 
   // Check file size (10MB limit)
   const maxSize = 10 * 1024 * 1024; // 10MB in bytes
   if (file.size > maxSize) {
-    return { 
-      isValid: false, 
-      error: "File size exceeds the 10MB limit." 
+    return {
+      isValid: false,
+      error: "File size exceeds the 10MB limit.",
     };
   }
 
@@ -57,13 +57,15 @@ export function FileUploadPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(
+    null
+  );
   const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Get token function
   const getToken = () => localStorage.getItem("auth_token");
-  
+
   // Get userId from user object
   const userId = user?.userId;
 
@@ -89,11 +91,14 @@ export function FileUploadPage() {
     const token = getToken();
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/document/get/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/document/get/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setDocuments(response.data);
     } catch (err) {
       console.error("Error fetching documents:", err);
@@ -116,7 +121,7 @@ export function FileUploadPage() {
       alert("Cannot upload file: User ID is missing.");
       return;
     }
-    
+
     // Validate the file before uploading
     const validation = validatePDF(file);
     if (!validation.isValid) {
@@ -124,9 +129,9 @@ export function FileUploadPage() {
       setTimeout(() => setUploadError(null), 5000); // Clear error after 5 seconds
       return;
     }
-    
+
     setUploadError(null); // Clear any previous errors
-    
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("userId", userId);
@@ -145,7 +150,7 @@ export function FileUploadPage() {
           },
         }
       );
-      
+
       alert("File uploaded successfully! ");
       fetchDocuments();
     } catch (error) {
@@ -204,7 +209,7 @@ export function FileUploadPage() {
     }
   };
 
-  const handleFileDelete = async (fileId: string) => {
+ const handleFileDelete = async (fileId: string) => {
   if (!fileId || !userId) {
     alert("Cannot delete file: Missing required information.");
     return;
@@ -214,37 +219,29 @@ export function FileUploadPage() {
   if (!confirmDelete) return;
 
   setDeletingFileId(fileId);
+  const token = getToken();
 
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    // path parameters instead of query params
-const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`, {
-  params: { userId },
-  headers: { Authorization: `Bearer ${token}` },
-});
+    await axios.delete(`${API_BASE_URL}/document/delete/${fileId}/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     alert("File deleted successfully!");
-    fetchDocuments();
-  } catch (error: unknown) {
+    fetchDocuments(); // Refresh the list
+  } catch (error) {
     console.error("Error deleting file:", error);
     let errorMessage = "Delete failed.";
-    
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error details:', error.response);
-      errorMessage = error.response?.data?.message || error.response?.data || error.message || "Delete failed.";
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+    if (axios.isAxiosError(error) && error.response) {
+      errorMessage = error.response.data || "Delete failed.";
     }
-    
     alert("Error: " + errorMessage);
   } finally {
     setDeletingFileId(null);
   }
 };
+
   // --- RENDER ---
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-4 sm:p-6 lg:p-8 pt-28">
@@ -258,13 +255,11 @@ const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`,
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              Upload Documents 
+              Upload Documents
             </h1>
             <p className="text-gray-400 mt-2">
               Upload your standard documents and master documents.
-
             </p>
           </div>
         </div>
@@ -307,7 +302,7 @@ const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`,
           className="backdrop-blur-xl bg-white/5 rounded-2xl border border-white/10 p-6"
         >
           <h2 className="text-2xl font-bold flex items-center mb-6 text-white">
-            <List className="mr-3 text-blue-400" /> 
+            <List className="mr-3 text-blue-400" />
             Your Uploaded Documents
           </h2>
 
@@ -343,14 +338,20 @@ const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`,
                           <FileIcon className="w-5 h-5 text-blue-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium truncate">{doc.fileName}</p>
-                          <p className="text-gray-400 text-sm">File ID: {doc.fileId}</p>
+                          <p className="text-white font-medium truncate">
+                            {doc.fileName}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            File ID: {doc.fileId}
+                          </p>
                         </div>
-                        <div className={`px-3 py-1 text-xs rounded-full border ${
-                          doc.status === "MASTER" 
-                            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
-                            : "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-                        }`}>
+                        <div
+                          className={`px-3 py-1 text-xs rounded-full border ${
+                            doc.status === "MASTER"
+                              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                              : "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                          }`}
+                        >
                           {doc.status}
                         </div>
                       </div>
@@ -361,7 +362,9 @@ const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`,
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => handleFileDownload(doc.fileId, doc.fileName)}
+                          onClick={() =>
+                            handleFileDownload(doc.fileId, doc.fileName)
+                          }
                           disabled={downloadingFileId === doc.fileId}
                           className="p-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
                           title="Download File"
@@ -402,8 +405,12 @@ const response = await axios.delete(`${API_BASE_URL}/document/delete/${fileId}`,
                   >
                     <FileIcon className="w-8 h-8 text-gray-400" />
                   </motion.div>
-                  <p className="text-gray-400 text-lg mb-2">No documents uploaded yet</p>
-                  <p className="text-gray-500 text-sm">Upload your first document to get started</p>
+                  <p className="text-gray-400 text-lg mb-2">
+                    No documents uploaded yet
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Upload your first document to get started
+                  </p>
                 </div>
               )}
             </div>
