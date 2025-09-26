@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { Country, State, City } from "country-state-city";
 import {
   Building2,
   MapPin,
@@ -148,9 +149,14 @@ export function EnhancedCreateProjectDialog({
   onOpenChange,
 }: EnhancedCreateProjectDialogProps) {
   const [activeTab, setActiveTab] = useState("project");
+  const [selectedCountry, setSelectedCountry] = useState("IN"); 
+const [selectedState, setSelectedState] = useState("");
+const statesList = State.getStatesOfCountry(selectedCountry);
+const citiesList = selectedState
+  ? City.getCitiesOfState(selectedCountry, selectedState)
+  : [];
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
 
   const projectForm = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
@@ -277,65 +283,65 @@ export function EnhancedCreateProjectDialog({
   });
 
   const createLeadMutation = useMutation({
-  mutationFn: async (newLeadData: CreateLeadFormData) => {
-    const currentUserId = getUserId();
-    const currentToken = getToken();
-    if (!currentUserId || !currentToken) {
-      throw new Error("User not authenticated. Please log in again.");
-    }
-    const dto: CreateLeadDTO = {
-      user: {
-        firstName: newLeadData.firstName,
-        lastName: newLeadData.lastName,
-        email: newLeadData.email,
-        phoneNumber: newLeadData.phoneNumber,
-      },
-      roleData: {
-        roleType: "USER",
-        addedByUserId: currentUserId,
-        location: {
-          country: newLeadData.country,
-          state: newLeadData.state,
-          city: newLeadData.city,
-          pincode: newLeadData.pincode,
-          addressLine1: newLeadData.addressLine1,
+    mutationFn: async (newLeadData: CreateLeadFormData) => {
+      const currentUserId = getUserId();
+      const currentToken = getToken();
+      if (!currentUserId || !currentToken) {
+        throw new Error("User not authenticated. Please log in again.");
+      }
+      const dto: CreateLeadDTO = {
+        user: {
+          firstName: newLeadData.firstName,
+          lastName: newLeadData.lastName,
+          email: newLeadData.email,
+          phoneNumber: newLeadData.phoneNumber,
         },
-      },
-    };
-    return await apiRequest<CreateLeadDTO>("/register/user", {
-      method: "POST",
-      body: dto,
-      headers: { Authorization: `Bearer ${currentToken}` },
-    });
-  },
-  onSuccess: () => {
-    const currentUserId = getUserId();
-    
-    // Close dialog
-    onOpenChange(false);
-    
-    // Invalidate the leads cache - this will trigger a refetch
-    if (currentUserId) {
-      queryClient.invalidateQueries({ queryKey: ["leads", currentUserId] });
-    }
+        roleData: {
+          roleType: "USER",
+          addedByUserId: currentUserId,
+          location: {
+            country: newLeadData.country,
+            state: newLeadData.state,
+            city: newLeadData.city,
+            pincode: newLeadData.pincode,
+            addressLine1: newLeadData.addressLine1,
+          },
+        },
+      };
+      return await apiRequest<CreateLeadDTO>("/register/user", {
+        method: "POST",
+        body: dto,
+        headers: { Authorization: `Bearer ${currentToken}` },
+      });
+    },
+    onSuccess: () => {
+      const currentUserId = getUserId();
 
-    // Show success toast
-    toast({
-      title: "Success",
-      description: "Lead created successfully!",
-    });
+      // Close dialog
+      onOpenChange(false);
 
-    // Reset form
-    leadForm.reset();
-  },
-  onError: (err: any) => {
-    toast({
-      title: "Error",
-      description: err.message || "Failed to create lead",
-      variant: "destructive",
-    });
-  },
-});
+      // Invalidate the leads cache - this will trigger a refetch
+      if (currentUserId) {
+        queryClient.invalidateQueries({ queryKey: ["leads", currentUserId] });
+      }
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Lead created successfully!",
+      });
+
+      // Reset form
+      leadForm.reset();
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to create lead",
+        variant: "destructive",
+      });
+    },
+  });
 
   const onProjectSubmit = (data: CreateProjectFormData) => {
     createProjectMutation.mutate(data);
@@ -345,36 +351,7 @@ export function EnhancedCreateProjectDialog({
     createLeadMutation.mutate(data);
   };
 
-  const indianStates = [
-    "Andhra Pradesh",
-    "Arunachal Pradesh",
-    "Assam",
-    "Bihar",
-    "Chhattisgarh",
-    "Goa",
-    "Gujarat",
-    "Haryana",
-    "Himachal Pradesh",
-    "Jharkhand",
-    "Karnataka",
-    "Kerala",
-    "Madhya Pradesh",
-    "Maharashtra",
-    "Manipur",
-    "Meghalaya",
-    "Mizoram",
-    "Nagaland",
-    "Odisha",
-    "Punjab",
-    "Rajasthan",
-    "Sikkim",
-    "Tamil Nadu",
-    "Telangana",
-    "Tripura",
-    "Uttar Pradesh",
-    "Uttarakhand",
-    "West Bengal",
-  ];
+  
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -621,53 +598,64 @@ export function EnhancedCreateProjectDialog({
                               )}
                             />
                             <FormField
-                              control={projectForm.control}
-                              name="city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    City
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="e.g., Mumbai"
-                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={projectForm.control}
-                              name="state"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="text-white">
-                                    State
-                                  </FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                        <SelectValue placeholder="Select state" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {indianStates.map((state) => (
-                                        <SelectItem key={state} value={state}>
-                                          {state}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+  control={projectForm.control}
+  name="state"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">State</FormLabel>
+      <Select
+        onValueChange={(val) => {
+          field.onChange(val);
+          setSelectedState(val); // update state for city dropdown
+        }}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select state" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {statesList.map((state) => (
+            <SelectItem key={state.isoCode} value={state.isoCode}>
+              {state.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={projectForm.control}
+  name="city"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">City</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select city" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {citiesList.map((city) => (
+            <SelectItem key={city.name} value={city.name}>
+              {city.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                             <FormField
                               control={projectForm.control}
                               name="pincode"
@@ -861,53 +849,64 @@ export function EnhancedCreateProjectDialog({
                                 )}
                               />
                               <FormField
-                                control={leadForm.control}
-                                name="state"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-white">
-                                      State
-                                    </FormLabel>
-                                    <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                          <SelectValue placeholder="Select state" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {indianStates.map((state) => (
-                                          <SelectItem key={state} value={state}>
-                                            {state}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={leadForm.control}
-                                name="city"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-white">
-                                      City
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="e.g., Bhopal"
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
+  control={leadForm.control}
+  name="state"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">State</FormLabel>
+      <Select
+        onValueChange={(val) => {
+          field.onChange(val);
+          setSelectedState(val);
+        }}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select state" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {statesList.map((state) => (
+            <SelectItem key={state.isoCode} value={state.isoCode}>
+              {state.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={leadForm.control}
+  name="city"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel className="text-white">City</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        value={field.value || ""}
+      >
+        <FormControl>
+          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+            <SelectValue placeholder="Select city" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {citiesList.map((city) => (
+            <SelectItem key={city.name} value={city.name}>
+              {city.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                               <FormField
                                 control={leadForm.control}
                                 name="pincode"

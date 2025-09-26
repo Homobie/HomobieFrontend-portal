@@ -206,41 +206,38 @@ export function FileUploadPage() {
 
   // --- API CALL TO DELETE FILE ---
   const handleFileDelete = async (fileId: string) => {
-    if (!fileId || !userId) {
-      alert("Cannot delete file: Missing required information.");
-      return;
+  if (!fileId || !userId) {
+    alert("Cannot delete file: Missing required information.");
+    return;
+  }
+
+  const confirmDelete = window.confirm("Are you sure you want to delete this file?");
+  if (!confirmDelete) return;
+
+  setDeletingFileId(fileId);
+  const token = getToken();
+
+  try {
+    await axios.delete(`${API_BASE_URL}/document/delete/${fileId}/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    alert("File deleted successfully!");
+    fetchDocuments(); // Refresh the list
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    let errorMessage = "Delete failed.";
+    if (axios.isAxiosError(error) && error.response) {
+      errorMessage = error.response.data || "Delete failed.";
     }
+    alert("Error: " + errorMessage);
+  } finally {
+    setDeletingFileId(null);
+  }
+};
 
-    const confirmDelete = window.confirm("Are you sure you want to delete this file?");
-    if (!confirmDelete) return;
-
-    setDeletingFileId(fileId);
-    const token = getToken();
-
-    try {
-      await axios.delete(`${API_BASE_URL}/document/delete`, {
-        params: {
-          fileId,
-          userId,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      alert("File deleted successfully!");
-      fetchDocuments(); // Refresh the list
-    } catch (error) {
-      console.error("Error deleting file:", error);
-      let errorMessage = "Delete failed.";
-      if (axios.isAxiosError(error) && error.response) {
-        errorMessage = error.response.data || "Delete failed.";
-      }
-      alert("Error: " + errorMessage);
-    } finally {
-      setDeletingFileId(null);
-    }
-  };
 
   // --- RENDER ---
   return (

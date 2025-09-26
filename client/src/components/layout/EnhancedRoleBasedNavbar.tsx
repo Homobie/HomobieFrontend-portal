@@ -69,7 +69,7 @@ export function EnhancedRoleBasedNavbar({
         return [
           { path: "/builder", label: "Builder Portal", icon: Building2 },
           { path: "/leads", label: "Lead Management", icon: Target },
-          { path: "/analytics", label: "Analytics", icon: BarChart3 },
+          // { path: "/analytics", label: "Analytics", icon: BarChart3 },
           { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
@@ -170,7 +170,6 @@ export function EnhancedRoleBasedNavbar({
                 <Building2 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <Link href="/dashboard">
                   <a className="block">
                     <h1 className="text-xl font-bold bg-gradient-to-r from-black to-emerald-100 bg-clip-text text-transparent">
                       Homobie
@@ -179,7 +178,6 @@ export function EnhancedRoleBasedNavbar({
                       Loan Management System
                     </p>
                   </a>
-                </Link>
               </div>
             </motion.div>
 
