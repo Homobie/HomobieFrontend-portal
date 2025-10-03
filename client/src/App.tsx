@@ -115,7 +115,7 @@ function getRoleBasedRoute(role: string): string {
   const routes: Record<string, string> = {
     super_admin: "/admin",
     admin: "/admin",
-    builder: "/builder-dashboard",
+    builder: "/builder",
     telecaller: "/telecaller",
     broker: "/broker",
     ca: "/ca",
