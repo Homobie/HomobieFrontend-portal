@@ -296,9 +296,8 @@ export default function GlassLogin() {
             </div>
 
             {/* Remember Me and Sign In Button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                {/* MODIFIED: Connected checkbox to state */}
+            <div className="flex items-center justify-end">
+              {/* <div className="flex items-center">
                 <input
                   id="remember-me"
                   name="remember-me"
@@ -314,7 +313,7 @@ export default function GlassLogin() {
                 >
                   Remember me
                 </label>
-              </div>
+              </div> */}
 
               <GlassButton
                 type="submit"

@@ -279,7 +279,7 @@ export function FileUploadPage() {
         {/* Upload Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
           <FileUploader
-            title="Normal File Upload"
+            title="Customer File Upload"
             description="Upload standard documents like PDFs."
             icon={<FileIcon className="w-10 h-10 text-cyan-400" />}
             onFileUpload={(file) => handleFileUpload(file, "NORMAL")}
