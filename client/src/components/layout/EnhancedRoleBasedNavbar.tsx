@@ -141,7 +141,7 @@ export function EnhancedRoleBasedNavbar({
       case "broker":
         return "bg-orange-500/20 text-orange-100 border-orange-500/30";
       case "telecaller":
-        return "bg-cyan-500/20 text-cyan-100 border-cyan-500/30";
+        return "bg-cyan-500/30 text-black border-cyan-500/30";
       default:
         return "bg-gray-500/20 text-black border-gray-500/30";
     }

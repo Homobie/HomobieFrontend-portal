@@ -77,7 +77,7 @@ export function Settings() {
 
         //update password
         await axios.post(
-          `https://api.homobie.com/reset-password?email=${encodeURIComponent(
+          `${import.meta.env.VITE_BASE_URL}/reset-password?email=${encodeURIComponent(
             user?.email || ""
           )}&newPassword=${encodeURIComponent(
             settings.security.newPassword

@@ -66,7 +66,7 @@ const OAuth = () => {
     console.log("Starting OAuth callback with code:", code);
     
     try {
-      const response = await fetch('https://api.homobie.com/auth/oauth/callback', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/auth/oauth/callback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ const OAuth = () => {
       
       // Redirect to your backend OAuth2 endpoint
       console.log("Redirecting to Google OAuth...");
-      window.location.href = 'https://api.homobie.com/oauth2/authorization/google';
+      window.location.href = `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/google`;
     } catch (error) {
       console.error("OAuth redirect failed:", error);
       toast.error("Failed to initiate Google login. Please try again.");

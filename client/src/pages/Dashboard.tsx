@@ -42,7 +42,7 @@ import { ChatbotWidget } from "@/components/dashboard/ChatbotWidget";
 
 
 // --- API Configuration & Types ---
-const API_BASE_URL = "https://api.homobie.com";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 // Generic types for data models
 interface LocationResponse { city: string; state: string; }

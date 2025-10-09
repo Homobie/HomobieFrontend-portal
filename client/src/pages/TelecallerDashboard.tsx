@@ -1,26 +1,57 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Phone, Target, Clock, CheckCircle, AlertTriangle, Users, TrendingUp, Award } from "lucide-react";
+import {
+  Phone,
+  Target,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Users,
+  TrendingUp,
+  Award,
+} from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-// import { RoleBasedNavbar } from "@/components/layout/RoleBasedNavbar";
+import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import type { LeadsResponse, Lead } from "@/types/api";
+import  BankRecommendation  from "./BankRecommendation/BankRecommendation";
 
 export default function TelecallerDashboard() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAllLeads, setShowAllLeads] = useState(false);
+  const [allLeads, setAllLeads] = useState<Lead[]>([]);
+  const token = localStorage.getItem("auth_token");
+  const telecallerId = user?.userId;
 
-  // Fetch assigned leads
-  const { data: leadsData = { leads: [], total: 0 } } = useQuery<LeadsResponse>({
-    queryKey: ["/api/leads"],
-    refetchInterval: 30000,
-  });
+  const fetchAllLeads = async () => {
+    if (!telecallerId) return;
 
-  const myLeads = leadsData.leads.filter(lead => lead.assignedToId === user?.id);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/telecallers/getLeads/${telecallerId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch leads");
+
+      const data = await response.json();
+      setAllLeads(data.leads || []);
+      setShowAllLeads(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,7 +83,7 @@ export default function TelecallerDashboard() {
     },
     {
       title: "Assigned Leads",
-      value: myLeads.length,
+      value: 0,
       icon: Target,
       change: "+8%",
       gradient: "from-emerald-500/20 to-teal-500/20",
@@ -79,9 +110,9 @@ export default function TelecallerDashboard() {
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-      
-      <RoleBasedNavbar user={user} onLogout={logout} />
-      
+
+      <EnhancedRoleBasedNavbar user={user} onLogout={logout} />
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -110,9 +141,16 @@ export default function TelecallerDashboard() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
             >
-              <GlassCard gradient="neutral" blur="md" hover className="p-6 h-full">
+              <GlassCard
+                gradient="neutral"
+                blur="md"
+                hover
+                className="p-6 h-full"
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient}`}>
+                  <div
+                    className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient}`}
+                  >
                     <stat.icon className="h-6 w-6 text-white" />
                   </div>
                   <Badge variant="secondary" className="text-xs">
@@ -131,7 +169,9 @@ export default function TelecallerDashboard() {
         {/* Performance Overview */}
         <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Today's Performance</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              Today's Performance
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -162,41 +202,15 @@ export default function TelecallerDashboard() {
         <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Assigned Leads</h3>
-              <Badge variant="outline" className="text-blue-400 border-blue-400">
-                {myLeads.length} Active
+              <h3 className="text-xl font-semibold text-white">
+                Assigned Leads
+              </h3>
+              <Badge
+                variant="outline"
+                className="text-blue-400 border-blue-400"
+              >
+                0 Active
               </Badge>
-            </div>
-            <div className="space-y-3">
-              {myLeads.slice(0, 5).map((lead) => (
-                <motion.div
-                  key={lead.id}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-white">
-                        {lead.firstName[0]}{lead.lastName[0]}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">{lead.firstName} {lead.lastName}</p>
-                      <p className="text-sm text-gray-300">{lead.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Badge variant={lead.status === "new" ? "destructive" : "secondary"}>
-                      {lead.status}
-                    </Badge>
-                    <Button size="sm" className="bg-blue-500/20 hover:bg-blue-500/30">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call
-                    </Button>
-                  </div>
-                </motion.div>
-              ))}
             </div>
           </GlassCard>
         </motion.div>
@@ -204,13 +218,18 @@ export default function TelecallerDashboard() {
         {/* Quick Actions */}
         <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Quick Actions</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">
+              Quick Actions
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button className="h-16 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 hover:from-blue-500/30 hover:to-cyan-500/30">
                 <Phone className="h-6 w-6 mr-2" />
                 Start Calling
               </Button>
-              <Button className="h-16 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 hover:from-emerald-500/30 hover:to-teal-500/30">
+              <Button
+                className="h-16 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 hover:from-emerald-500/30 hover:to-teal-500/30"
+                onClick={fetchAllLeads}
+              >
                 <Target className="h-6 w-6 mr-2" />
                 View All Leads
               </Button>
@@ -221,7 +240,63 @@ export default function TelecallerDashboard() {
             </div>
           </GlassCard>
         </motion.div>
+        {showAllLeads && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute inset-0 z-20 bg-black/70 flex justify-center items-start p-6 overflow-auto"
+          >
+            <GlassCard
+              gradient="neutral"
+              blur="md"
+              className="p-6 w-full max-w-4xl space-y-4"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-white">All Leads</h3>
+                <Button
+                  size="sm"
+                  className="bg-red-500/20 hover:bg-red-500/30"
+                  onClick={() => setShowAllLeads(false)}
+                >
+                  Close
+                </Button>
+              </div>
+
+              <div className="space-y-3 max-h-[60vh] overflow-auto">
+                {allLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between p-4 bg-white/5 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-semibold text-white">
+                          {lead.firstName[0]}
+                          {lead.lastName[0]}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">
+                          {lead.firstName} {lead.lastName}
+                        </p>
+                        <p className="text-sm text-gray-300">{lead.email}</p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        lead.status === "new" ? "destructive" : "secondary"
+                      }
+                    >
+                      {lead.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
       </motion.div>
+        <BankRecommendation/>
     </div>
   );
 }

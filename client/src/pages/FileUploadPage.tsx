@@ -17,7 +17,7 @@ import { authService } from "@/lib/auth";
 import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 
 // --- Define your API Base URL ---
-const API_BASE_URL = "https://api.homobie.com";
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 // Define a type for our document object for better type safety
 type pdf = "pdf";

@@ -112,7 +112,7 @@ export default function LeadManagement() {
     queryKey: ["leads", user?.userId],
     queryFn: async () => {
       if (!user?.userId) return [];
-      const token = localStorage.getItem("auth_token") || "";
+      const token = localStorage.getItem("auth_token");
 
       // NOTE: The backend endpoint /leads/get/{userId} doesn't support search.
       // Search functionality is implemented on the client-side for now.
@@ -147,7 +147,7 @@ export default function LeadManagement() {
   
   const updateLeadMutation = useMutation({
     mutationFn: async ({ leadId, data }: { leadId: string; data: UpdateLeadFormData }) => {
-      const token = localStorage.getItem("auth_token") || "";
+      const token = localStorage.getItem("auth_token");
       // Assumes an endpoint like: PUT /leads/{leadId}/status
       return await apiRequest(`/leads/${leadId}/status`, {
         method: "PUT",

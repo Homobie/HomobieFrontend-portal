@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import HomobieLogo from "/attached_assets/wmremove-transformed_-_Edited-removebg-preview.png";
 import { Country, State, City } from "country-state-city";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.homobie.com';
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 // MODIFICATION: Added reraId to the FormData type
 type FormData = {
@@ -20,34 +20,38 @@ type FormData = {
   lastName: string;
   email: string;
   phoneNumber: string;
-  roleType: "USER" | "BUILDER" | "BROKER" | "CA" | "ADMIN";
+  roleType: "USER" | "BUILDER" | "BROKER" | "CA" | "ADMIN" | "TELECALLER";
   companyName: string;
-  reraId: string; // Added this field
+  reraId: string;
   country: string;
   state: string;
   city: string;
   pincode: string;
   addressLine1: string;
+  shift?: "Morning" | "Evening" | "Night";
 };
+
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   // MODIFICATION: Initialized reraId in the component's state
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    roleType: "USER",
-    companyName: "",
-    reraId: "", // Added this field
-    country: "",
-    state: "",
-    city: "",
-    pincode: "",
-    addressLine1: ""
-  });
+  firstName: "",
+  lastName: "",
+  email: "",
+  phoneNumber: "",
+  roleType: "USER",
+  companyName: "",
+  reraId: "",
+  country: "",
+  state: "",
+  city: "",
+  pincode: "",
+  addressLine1: "",
+  shift: "Morning", 
+});
+
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -66,6 +70,7 @@ export default function Register() {
       // Reset builder-specific fields if role changes from builder
       companyName: value === 'BUILDER' ? prev.companyName : '',
       reraId: value === 'BUILDER' ? prev.reraId : '',
+      shift: value === 'TELECALLER' ? prev.shift : undefined,
     }));
   };
 
@@ -82,35 +87,45 @@ export default function Register() {
     try {
       // MODIFICATION: Added reraId to the submission payload for Builders
       const registrationData = {
-        user: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber
-        },
-        roleData: {
-          roleType: formData.roleType,
-          ...(formData.roleType === "BUILDER" ? {
-            companyName: formData.companyName,
-            reraId: formData.reraId, // Added this field
-            location: {
-              country: formData.country,
-              state: formData.state,
-              city: formData.city,
-              pincode: formData.pincode,
-              addressLine1: formData.addressLine1
-            }
-          } : {
-            location: {
-              country: formData.country,
-              state: formData.state,
-              city: formData.city,
-              pincode: formData.pincode,
-              addressLine1: formData.addressLine1
-            }
-          })
-        }
-      };
+  user: {
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    email: formData.email,
+    phoneNumber: formData.phoneNumber
+  },
+  roleData: {
+    roleType: formData.roleType,
+    ...(formData.roleType === "BUILDER" ? {
+      companyName: formData.companyName,
+      reraId: formData.reraId,
+      location: {
+        country: formData.country,
+        state: formData.state,
+        city: formData.city,
+        pincode: formData.pincode,
+        addressLine1: formData.addressLine1
+      }
+    } : formData.roleType === "TELECALLER" ? {
+      shift: formData.shift,
+      location: {
+        country: formData.country,
+        state: formData.state,
+        city: formData.city,
+        pincode: formData.pincode,
+        addressLine1: formData.addressLine1
+      }
+    } : {
+      location: {
+        country: formData.country,
+        state: formData.state,
+        city: formData.city,
+        pincode: formData.pincode,
+        addressLine1: formData.addressLine1
+      }
+    })
+  }
+};
+
       console.log(
         registrationData
       )
@@ -337,9 +352,38 @@ export default function Register() {
                       <SelectItem value="BROKER">Broker</SelectItem>
                       <SelectItem value="CA">Chartered Accountant</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
+                      <SelectItem value="TELECALLER">Lead Manager</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+{formData.roleType === 'TELECALLER' && (
+  <div className="space-y-2">
+    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      Shift
+    </label>
+    <Select
+      value={formData.shift}
+      onValueChange={(value) =>
+        setFormData((prev) => ({ ...prev, shift: value as FormData['shift'] }))
+      }
+    >
+      <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400">
+        <SelectValue placeholder="Select Shift" />
+      </SelectTrigger>
+      <SelectContent>
+         <SelectItem value="MORNING">
+                                        Morning
+                                      </SelectItem>
+                                      <SelectItem value="EVENING">
+                                        Evening
+                                      </SelectItem>
+                                      <SelectItem value="NIGHT">
+                                        Night
+                                      </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+)}
 
                 {/* MODIFICATION: Conditionally render Company Name and RERA ID fields */}
                 {formData.roleType === 'BUILDER' && (

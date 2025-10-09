@@ -76,7 +76,7 @@ const CompleteProfile: React.FC<CompleteProfileProps> = ({
         roleData: roleData,
       };
 
-      const response = await fetch('https://api.homobie.com/register/update', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/register/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestPayload),

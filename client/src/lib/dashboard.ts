@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Create axios instance with auth headers
 const api = axios.create({
-  baseURL: API_BASE_URL || 'https://api.homobie.com',
+  baseURL: import.meta.env.VITE_BASE_URL,
 });
+
 
 // Add request interceptor to include auth token
 api.interceptors.request.use((config) => {

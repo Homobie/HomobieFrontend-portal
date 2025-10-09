@@ -76,10 +76,10 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
     return <Redirect to="/login" />;
   }
 
+  
   return (
     <>
       <GlassBackground />
-      {/* <GlassNavbar /> */}
       <main className="pt-16 min-h-screen custom-scrollbar">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}
@@ -90,6 +90,36 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
     </>
   );
 }
+
+export function RoleProtectedRoute({
+  allowedRoles,
+  children,
+}: {
+  allowedRoles: string[];
+  children: React.ReactNode;
+}) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-500"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Redirect to="/login" />;
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    // redirect unauthorized users to their own dashboard
+    return <Redirect to={getRoleBasedRoute(user.role)} />;
+  }
+
+  return <>{children}</>;
+}
+
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
@@ -201,25 +231,31 @@ function AppRouter() {
         </ProtectedLayout>
       </Route>
       <Route path="/builder">
-        <ProtectedLayout>
-          <SimplifiedBuilderDashboard />
-        </ProtectedLayout>
-      </Route>
+  <ProtectedLayout>
+    <RoleProtectedRoute allowedRoles={["builder"]}>
+      <SimplifiedBuilderDashboard />
+    </RoleProtectedRoute>
+  </ProtectedLayout>
+</Route>
       <Route path="/builder-dashboard">
         <ProtectedLayout>
           <BuilderDashboard />
         </ProtectedLayout>
       </Route>
       <Route path="/telecaller">
-        <ProtectedLayout>
-          <TelecallerDashboard />
-        </ProtectedLayout>
-      </Route>
+  <ProtectedLayout>
+    <RoleProtectedRoute allowedRoles={["telecaller"]}>
+      <TelecallerDashboard />
+    </RoleProtectedRoute>
+  </ProtectedLayout>
+</Route>
       <Route path="/admin">
-        <ProtectedLayout>
-          <AdminDashboard />
-        </ProtectedLayout>
-      </Route>
+  <ProtectedLayout>
+    <RoleProtectedRoute allowedRoles={["super_admin", "admin"]}>
+      <AdminDashboard />
+    </RoleProtectedRoute>
+  </ProtectedLayout>
+</Route>
       <Route path="/broker">
         <ProtectedLayout>
           <BrokerDashboard />

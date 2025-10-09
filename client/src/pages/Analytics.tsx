@@ -48,7 +48,7 @@ interface MonthlyUsersData {
   count: number;
 }
 
-const BASE_URL = "https://api.homobie.com";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 // Updated based on backend enum values from error messages
 const STATUS_OPTIONS = [

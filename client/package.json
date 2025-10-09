@@ -56,6 +56,7 @@
     "css": "^3.0.0",
     "date-fns": "^3.6.0",
     "dom": "^0.0.3",
+    "dotenv": "^17.2.3",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.18.2",
     "hooks": "^0.3.2",

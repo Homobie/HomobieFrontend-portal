@@ -18,7 +18,7 @@ export default defineConfig({
     proxy: {
       '/api': {
 
-        target: 'https://api.homobie.com', // Your backend server
+        target: process.env.VITE_BASE_URL,
 
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/auth/, ''),
