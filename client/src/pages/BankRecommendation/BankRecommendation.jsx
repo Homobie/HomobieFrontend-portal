@@ -10,9 +10,17 @@ import {
   Calendar,
   IndianRupee,
 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 import ViewDetails from "./ViewDetails";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const BankRecommendation = () => {
+   const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
     bankType: "",
     loanType: "",
@@ -42,6 +50,7 @@ const BankRecommendation = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [selectedBank, setSelectedBank] = useState(null);
+  
 
   const bankTypes = ["PUBLIC", "PRIVATE", "NBFC"];
   const loanTypes = [
@@ -257,7 +266,8 @@ const BankRecommendation = () => {
   }, [pagination]);
 
   return (
-    <div className="pt-20 min-h-screen bg-gray-50 p-6 text-gray-900">
+    <div className="pt-10 min-h-screen bg-gray-50 p-6 text-gray-900">
+      <EnhancedRoleBasedNavbar user={user} onLogout={logout} />
       <div className="mt-4 max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white backdrop-blur-lg border border-gray-200 rounded-2xl shadow-lg p-6 mb-6 transition hover:shadow-2xl hover:backdrop-brightness-125">

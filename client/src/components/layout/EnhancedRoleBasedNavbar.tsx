@@ -76,9 +76,9 @@ export function EnhancedRoleBasedNavbar({
       case "telecaller":
         return [
           { path: "/telecaller", label: "Telecaller Portal", icon: Phone },
-          { path: "/leads", label: "My Leads", icon: Target },
-          { path: "/analytics", label: "Analytics", icon: BarChart3 },
-          { path: "/upload", label: "Upload Docs", icon: Upload },
+          { path: "/bank-recommendation", label: "Bank Recommendation", icon: FileText },
+          // { path: "/analytics", label: "Analytics", icon: BarChart3 },
+          // { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "ca":

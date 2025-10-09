@@ -36,6 +36,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import BrokerDashboard from "@/pages/BrokerDashboard";
 import CADashboard from "@/pages/CADashboard";
 import TelecallerPortal from "@/pages/TelecallerPortal";
+import BankRecommendation from "@/pages/BankRecommendation/BankRecommendation";
 import UserDashboard from "@/pages/UserDashboard";
 import DocumentManagement from "@/pages/DocumentManagement";
 import TelecallerManagement from "@/pages/TelecallerManagement";
@@ -203,6 +204,11 @@ function AppRouter() {
       <Route path="/leads">
         <ProtectedLayout>
           <LeadManagementPage />
+        </ProtectedLayout>
+      </Route>
+      <Route path="/bank-recommendation">
+        <ProtectedLayout>
+          <BankRecommendation />
         </ProtectedLayout>
       </Route>
       <Route path="/users">

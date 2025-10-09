@@ -18,7 +18,6 @@ import { Progress } from "@/components/ui/progress";
 import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import type { LeadsResponse, Lead } from "@/types/api";
-import  BankRecommendation  from "./BankRecommendation/BankRecommendation";
 
 export default function TelecallerDashboard() {
   const { user, logout } = useAuth();
@@ -46,7 +45,7 @@ export default function TelecallerDashboard() {
       if (!response.ok) throw new Error("Failed to fetch leads");
 
       const data = await response.json();
-      setAllLeads(data.leads || []);
+      setAllLeads(Array.isArray(data) ? data : data.leads || []);
       setShowAllLeads(true);
     } catch (err) {
       console.error(err);
@@ -105,11 +104,9 @@ export default function TelecallerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
 
       <EnhancedRoleBasedNavbar user={user} onLogout={logout} />
 
@@ -117,14 +114,14 @@ export default function TelecallerDashboard() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 p-4 md:p-6 space-y-6 md:space-y-8 pt-20 md:pt-24"
+        className="relative z-10 p-4 md:p-6 space-y-6 md:space-y-8 pt-20 md:pt-12"
       >
         {/* Header */}
-        <motion.div variants={itemVariants} className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+        <motion.div variants={itemVariants} className="text-center space-y-2">
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-700">
             Telecaller Portal
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
             Manage your leads, track calls, and monitor performance
           </p>
         </motion.div>
@@ -151,15 +148,15 @@ export default function TelecallerDashboard() {
                   <div
                     className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient}`}
                   >
-                    <stat.icon className="h-6 w-6 text-white" />
+                    <stat.icon className="h-6 w-6 text-black" />
                   </div>
                   <Badge variant="secondary" className="text-xs">
                     {stat.change}
                   </Badge>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold text-white">{stat.value}</p>
-                  <p className="text-sm text-gray-300">{stat.title}</p>
+                  <p className="text-3xl font-bold text-black">{stat.value}</p>
+                  <p className="text-sm text-gray-700">{stat.title}</p>
                 </div>
               </GlassCard>
             </motion.div>
@@ -169,27 +166,27 @@ export default function TelecallerDashboard() {
         {/* Performance Overview */}
         <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">
+            <h3 className="text-xl font-semibold text-black mb-4">
               Today's Performance
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Call Success Rate</span>
+                  <span className="text-gray-700">Call Success Rate</span>
                   <span className="text-emerald-400 font-semibold">75%</span>
                 </div>
                 <Progress value={75} className="h-2" />
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Lead Conversion</span>
+                  <span className="text-gray-700">Lead Conversion</span>
                   <span className="text-blue-400 font-semibold">60%</span>
                 </div>
                 <Progress value={60} className="h-2" />
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Daily Target</span>
+                  <span className="text-gray-700">Daily Target</span>
                   <span className="text-purple-400 font-semibold">80%</span>
                 </div>
                 <Progress value={80} className="h-2" />
@@ -199,10 +196,10 @@ export default function TelecallerDashboard() {
         </motion.div>
 
         {/* Assigned Leads */}
-        <motion.div variants={itemVariants}>
+        {/* <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-black">
                 Assigned Leads
               </h3>
               <Badge
@@ -213,12 +210,12 @@ export default function TelecallerDashboard() {
               </Badge>
             </div>
           </GlassCard>
-        </motion.div>
+        </motion.div> */}
 
         {/* Quick Actions */}
         <motion.div variants={itemVariants}>
           <GlassCard gradient="neutral" blur="md" className="p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">
+            <h3 className="text-xl font-semibold text-black mb-4">
               Quick Actions
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -241,62 +238,87 @@ export default function TelecallerDashboard() {
           </GlassCard>
         </motion.div>
         {showAllLeads && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute inset-0 z-20 bg-black/70 flex justify-center items-start p-6 overflow-auto"
+          <GlassCard
+            gradient="neutral"
+            blur="md"
+            className="p-6 w-full max-w-4xl space-y-4"
           >
-            <GlassCard
-              gradient="neutral"
-              blur="md"
-              className="p-6 w-full max-w-4xl space-y-4"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-white">All Leads</h3>
-                <Button
-                  size="sm"
-                  className="bg-red-500/20 hover:bg-red-500/30"
-                  onClick={() => setShowAllLeads(false)}
-                >
-                  Close
-                </Button>
-              </div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-black">All Leads</h3>
+              <Button
+                size="sm"
+                className="bg-red-500/20 hover:bg-red-500/30"
+                onClick={() => setShowAllLeads(false)}
+              >
+                Close
+              </Button>
+            </div>
 
-              <div className="space-y-3 max-h-[60vh] overflow-auto">
-                {allLeads.map((lead) => (
-                  <div
-                    key={lead.id}
-                    className="flex items-center justify-between p-4 bg-white/5 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-4">
+            <div className="space-y-3 max-h-[60vh] overflow-auto">
+              {allLeads.map((lead) => (
+                <div
+                  key={lead.leadId}
+                  className="p-4 bg-white/10 backdrop-blur-md rounded-xl shadow-sm hover:shadow-md transition border border-white/20 space-y-3"
+                >
+                  {/* Header (Name + Status) */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-semibold text-white">
+                        <span className="text-sm font-semibold text-black">
                           {lead.firstName[0]}
                           {lead.lastName[0]}
                         </span>
                       </div>
-                      <div>
-                        <p className="font-medium text-white">
-                          {lead.firstName} {lead.lastName}
-                        </p>
-                        <p className="text-sm text-gray-300">{lead.email}</p>
-                      </div>
+                      <p className="font-semibold text-black text-lg">
+                        {lead.firstName} {lead.lastName}
+                      </p>
                     </div>
                     <Badge
                       variant={
-                        lead.status === "new" ? "destructive" : "secondary"
+                        lead.leadStatus === "TELECALLER_ASSIGNED"
+                          ? "secondary"
+                          : lead.leadStatus === "COMPLETED"
+                            ? "success"
+                            : "outline"
                       }
                     >
-                      {lead.status}
+                      {lead.leadStatus}
                     </Badge>
                   </div>
-                ))}
-              </div>
-            </GlassCard>
-          </motion.div>
+
+                  {/* Contact Details */}
+                  <div className="text-sm text-gray-800 grid grid-cols-1 md:grid-cols-2 gap-y-1">
+                    <p>
+                      <span className="font-medium text-gray-600">Phone:</span>{" "}
+                      {lead.phoneNumber || "N/A"}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-600">City:</span>{" "}
+                      {lead.location?.city || "N/A"}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-600">State:</span>{" "}
+                      {lead.location?.state || "N/A"}
+                    </p>
+                    <p>
+                      <span className="font-medium text-gray-600">
+                        Pincode:
+                      </span>{" "}
+                      {lead.location?.pincode || "N/A"}
+                    </p>
+                    <p className="md:col-span-2">
+                      <span className="font-medium text-gray-600">
+                        Address:
+                      </span>{" "}
+                      {lead.location?.addressLine1 || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
         )}
       </motion.div>
-        <BankRecommendation/>
     </div>
   );
 }
