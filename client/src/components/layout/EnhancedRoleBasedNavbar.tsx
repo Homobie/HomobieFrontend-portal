@@ -78,7 +78,7 @@ export function EnhancedRoleBasedNavbar({
           { path: "/telecaller", label: "Telecaller Portal", icon: Phone },
           { path: "/bank-recommendation", label: "Bank Recommendation", icon: FileText },
           // { path: "/analytics", label: "Analytics", icon: BarChart3 },
-          // { path: "/upload", label: "Upload Docs", icon: Upload },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
       case "ca":
