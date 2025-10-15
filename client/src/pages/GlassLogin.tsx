@@ -21,7 +21,9 @@ type UserRole =
   | "telecaller"
   | "broker"
   | "ca"
-  | "user";
+  | "user"
+  | "sales"
+  ;
 
 export default function GlassLogin() {
   const [, setLocation] = useLocation();
@@ -100,6 +102,7 @@ export default function GlassLogin() {
       broker: "/broker",
       ca: "/ca/portfolio",
       user: "/dashboard",
+      sales: "/sales",
     };
 
     const normalizedRole = role.toLowerCase();

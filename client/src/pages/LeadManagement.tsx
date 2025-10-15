@@ -390,6 +390,7 @@ export default function LeadManagement() {
       <EnhancedCreateProjectDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+         userRole={user?.role}
       />
 
       {/* View Lead Dialog */}

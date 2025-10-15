@@ -20,7 +20,7 @@ type FormData = {
   lastName: string;
   email: string;
   phoneNumber: string;
-  roleType: "USER" | "BUILDER" | "BROKER" | "CA" | "ADMIN" | "TELECALLER";
+  roleType: "USER" | "BUILDER" | "BROKER" | "CA" | "ADMIN" | "TELECALLER" | "SALES";
   companyName: string;
   reraId: string;
   country: string;
@@ -353,6 +353,7 @@ export default function Register() {
                       <SelectItem value="CA">Chartered Accountant</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
                       <SelectItem value="TELECALLER">Lead Manager</SelectItem>
+                      <SelectItem value="SALES">Sales</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

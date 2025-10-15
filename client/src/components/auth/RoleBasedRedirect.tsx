@@ -17,7 +17,8 @@ export function RoleBasedRedirect() {
         telecaller: "/telecaller",
         broker: "/broker",
         ca: "/ca",
-        user: "/user"
+        user: "/user",
+        sales:"/sales"
       };
 
       const targetRoute = roleRoutes[user.role];

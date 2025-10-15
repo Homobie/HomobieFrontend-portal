@@ -1,4 +1,4 @@
-export type UserRole = "super_admin" | "admin" | "ca" | "builder" | "broker" | "user" | "telecaller";
+export type UserRole = "super_admin" | "admin" | "ca" | "builder" | "broker" | "user" | "telecaller" | "sales";
 
 export type LeadStatus =
   | "new"
@@ -158,7 +158,8 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   builder: "Builder",
   broker: "Broker",
   user: "User",
-  telecaller: "Telecaller"
+  telecaller: "Telecaller",
+  sales: "Sales",
 };
 
 // Color mapping for statuses

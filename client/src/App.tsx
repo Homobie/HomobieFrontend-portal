@@ -19,6 +19,7 @@ import { ChatbotWidget } from "@/components/dashboard/ChatbotWidget";
 import Dashboard from "@/pages/Dashboard";
 import { FileUploadPage } from "@/pages/FileUploadPage";
 import LeadManagementPage from "@/pages/LeadManagement";
+import SalesLead from "./pages/SalesLead";
 import UserManagement from "@/pages/UserManagement";
 import AuditLogs from "@/pages/AuditLogs";
 import { Tracking } from "@/pages/Tracking";
@@ -32,6 +33,7 @@ import { DocumentManager } from "@/components/dashboard/DocumentManager";
 import BuilderDashboard from "@/pages/BuilderDashboard";
 import SimplifiedBuilderDashboard from "@/pages/SimplifiedBuilderDashboard";
 import TelecallerDashboard from "@/pages/TelecallerDashboard";
+import SalesDashboard from "./pages/SalesDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import BrokerDashboard from "@/pages/BrokerDashboard";
 import CADashboard from "@/pages/CADashboard";
@@ -77,7 +79,6 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
     return <Redirect to="/login" />;
   }
 
-  
   return (
     <>
       <GlassBackground />
@@ -173,7 +174,7 @@ function RoleBasedRedirectWrapper() {
 }
 
 /**
- * Main app router 
+ * Main app router
  */
 function AppRouter() {
   return (
@@ -204,6 +205,11 @@ function AppRouter() {
       <Route path="/leads">
         <ProtectedLayout>
           <LeadManagementPage />
+        </ProtectedLayout>
+      </Route>
+      <Route path="/sales-leads">
+        <ProtectedLayout>
+          <SalesLead />
         </ProtectedLayout>
       </Route>
       <Route path="/bank-recommendation">
@@ -237,31 +243,38 @@ function AppRouter() {
         </ProtectedLayout>
       </Route>
       <Route path="/builder">
-  <ProtectedLayout>
-    <RoleProtectedRoute allowedRoles={["builder"]}>
-      <SimplifiedBuilderDashboard />
-    </RoleProtectedRoute>
-  </ProtectedLayout>
-</Route>
+        <ProtectedLayout>
+          <RoleProtectedRoute allowedRoles={["builder"]}>
+            <SimplifiedBuilderDashboard />
+          </RoleProtectedRoute>
+        </ProtectedLayout>
+      </Route>
       <Route path="/builder-dashboard">
         <ProtectedLayout>
           <BuilderDashboard />
         </ProtectedLayout>
       </Route>
       <Route path="/telecaller">
-  <ProtectedLayout>
-    <RoleProtectedRoute allowedRoles={["telecaller"]}>
-      <TelecallerDashboard />
-    </RoleProtectedRoute>
-  </ProtectedLayout>
-</Route>
+        <ProtectedLayout>
+          <RoleProtectedRoute allowedRoles={["telecaller"]}>
+            <TelecallerDashboard />
+          </RoleProtectedRoute>
+        </ProtectedLayout>
+      </Route>
+      <Route path="/sales">
+        <ProtectedLayout>
+          <RoleProtectedRoute allowedRoles={["sales"]}>
+            <SalesDashboard />
+          </RoleProtectedRoute>
+        </ProtectedLayout>
+      </Route>
       <Route path="/admin">
-  <ProtectedLayout>
-    <RoleProtectedRoute allowedRoles={["super_admin", "admin"]}>
-      <AdminDashboard />
-    </RoleProtectedRoute>
-  </ProtectedLayout>
-</Route>
+        <ProtectedLayout>
+          <RoleProtectedRoute allowedRoles={["super_admin", "admin"]}>
+            <AdminDashboard />
+          </RoleProtectedRoute>
+        </ProtectedLayout>
+      </Route>
       <Route path="/broker">
         <ProtectedLayout>
           <BrokerDashboard />

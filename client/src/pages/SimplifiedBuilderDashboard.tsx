@@ -338,6 +338,7 @@ export default function ThemedBuilderDashboard() {
       <EnhancedCreateProjectDialog
         open={showCreateProject}
         onOpenChange={setShowCreateProject}
+         userRole={user?.role}
       />
       <CreateTeam open={showCreateTeam} onOpenChange={setShowCreateTeam} />
       <EnhancedAssignLeadDialog

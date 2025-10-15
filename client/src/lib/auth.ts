@@ -13,7 +13,7 @@ export interface AuthUser {
   userId: string;
 }
 
-export type UserRole = "super_admin" | "admin" | "ca" | "builder" | "broker" | "user" | "telecaller";
+export type UserRole = "super_admin" | "admin" | "ca" | "builder" | "broker" | "user" | "telecaller" | "sales";
 
 export interface LoginCredentials {
   username: string;
@@ -437,6 +437,10 @@ private loadFromStorage() {
       ],
       user: [
         "view_own_leads",
+      ],
+      sales: [
+        "view_own_leads",
+        "create_leads",
       ],
     };
 

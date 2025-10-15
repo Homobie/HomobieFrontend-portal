@@ -142,24 +142,27 @@ interface CreateLeadDTO {
 interface EnhancedCreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userRole?: string;
 }
 
 export function EnhancedCreateProjectDialog({
   open,
   onOpenChange,
+  userRole,
 }: EnhancedCreateProjectDialogProps) {
-  const [activeTab, setActiveTab] = useState("project");
+  const [activeTab, setActiveTab] = useState(
+  userRole === "SALES" ? "lead" : "project"
+);
   const [selectedCountry, setSelectedCountry] = useState("IN");
-const [selectedState, setSelectedState] = useState("");
+  const [selectedState, setSelectedState] = useState("");
 
-const statesList = State.getStatesOfCountry(selectedCountry);
+  const statesList = State.getStatesOfCountry(selectedCountry);
 
-const citiesList = selectedState
-  ? City.getCitiesOfState(selectedCountry, selectedState)
-  : [];
+  const citiesList = selectedState
+    ? City.getCitiesOfState(selectedCountry, selectedState)
+    : [];
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
 
   const projectForm = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
@@ -197,101 +200,107 @@ const citiesList = selectedState
   // --- Mutations ---
 
   const createProjectMutation = useMutation({
-    mutationFn: async (newProjectData: CreateProjectFormData) => {
-      const currentUserId = getUserId();
-      const currentToken = getToken();
-      if (!currentUserId || !currentToken) {
-        throw new Error("User not authenticated. Please log in again.");
-      }
-
-      const dto: CreateProjectDTO = {
-        builderId: currentUserId,
-        projectName: newProjectData.projectName,
-        projectType: newProjectData.projectType,
-        location: {
-          addressLine1: newProjectData.addressLine1,
-          addressLine2: newProjectData.addressLine2,
-          landmark: newProjectData.landmark,
-          city: newProjectData.city,
-          state: newProjectData.state,
-          pincode: newProjectData.pincode,
-        },
-        budget: newProjectData.budget,
-        units: newProjectData.units,
-        description: newProjectData.description,
-        status: "Active",
-        completedAt: newProjectData.completedAt
-          ? `${newProjectData.completedAt}T00:00:00`
-          : undefined,
-      };
-
-      return await apiRequest<CreateProjectDTO>("/project/add", {
-        method: "POST",
-        body: dto,
-        headers: { Authorization: `Bearer ${currentToken}` },
-      });
-    },
-    onSuccess: async (response, variables) => {
-      // Close dialog first
-      onOpenChange(false);
-
-      try {
-        // Get current user details
-        const currentUserId = getUserId();
-        const currentToken = getToken();
-
-        if (currentUserId && currentToken) {
-          // Call the exact same GET API that your component uses
-          const updatedProjects = await apiRequest(
-            `/project/get/${currentUserId}`,
-            {
-              method: "GET",
-              headers: { Authorization: `Bearer ${currentToken}` },
-            }
-          );
-
-          // Update the cache with the exact same query key your component uses
-          queryClient.setQueryData(
-            ["builderProjects", currentUserId],
-            updatedProjects
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching updated projects:", error);
-        // Fallback to invalidation if direct API call fails
-        const currentUserId = getUserId();
-        if (currentUserId) {
-          queryClient.invalidateQueries({
-            queryKey: ["builderProjects", currentUserId],
-          });
-        }
-      }
-
-      // Show success toast
-      toast({
-        title: "Success",
-        description: "Project created successfully!",
-      });
-
-      // Reset form
-      projectForm.reset();
-    },
-    onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || "Failed to create project",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const createLeadMutation = useMutation({
-  mutationFn: async (newLeadData: CreateLeadFormData) => {
+  mutationFn: async (newProjectData: CreateProjectFormData) => {
     const currentUserId = getUserId();
     const currentToken = getToken();
     if (!currentUserId || !currentToken) {
       throw new Error("User not authenticated. Please log in again.");
     }
+
+    const dto: CreateProjectDTO = {
+      builderId: currentUserId,
+      projectName: newProjectData.projectName,
+      projectType: newProjectData.projectType,
+      location: {
+        addressLine1: newProjectData.addressLine1,
+        addressLine2: newProjectData.addressLine2,
+        landmark: newProjectData.landmark,
+        city: newProjectData.city,
+        state: newProjectData.state,
+        pincode: newProjectData.pincode,
+      },
+      budget: newProjectData.budget,
+      units: newProjectData.units,
+      description: newProjectData.description,
+      status: "Active",
+      completedAt: newProjectData.completedAt
+        ? `${newProjectData.completedAt}T00:00:00`
+        : undefined,
+    };
+
+    try {
+      return await apiRequest<CreateProjectDTO>("/project/add", {
+        method: "POST",
+        body: dto,
+        headers: { Authorization: `Bearer ${currentToken}` },
+      });
+    } catch (error: any) {
+      const message =
+        error?.response?.message ||
+        error?.response?.detail ||
+        error?.response?.error ||
+        error?.message ||
+        "Failed to create project";
+      throw new Error(message);
+    }
+  },
+  onSuccess: async (response, variables) => {
+    onOpenChange(false);
+
+    try {
+      const currentUserId = getUserId();
+      const currentToken = getToken();
+
+      if (currentUserId && currentToken) {
+        const updatedProjects = await apiRequest(
+          `/project/get/${currentUserId}`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${currentToken}` },
+          }
+        );
+
+        queryClient.setQueryData(
+          ["builderProjects", currentUserId],
+          updatedProjects
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching updated projects:", error);
+      const currentUserId = getUserId();
+      if (currentUserId) {
+        queryClient.invalidateQueries({
+          queryKey: ["builderProjects", currentUserId],
+        });
+      }
+    }
+
+    toast({
+      title: "Success",
+      description: response?.message || "Project created successfully!",
+    });
+
+    projectForm.reset();
+  },
+  onError: (err: any) => {
+    console.error("Create Project Error:", err);
+    toast({
+      title: "Error",
+      description: err.message || "Failed to create project",
+      variant: "destructive",
+    });
+  },
+});
+
+ const createLeadMutation = useMutation({
+  mutationFn: async (newLeadData: CreateLeadFormData) => {
+    const currentUserId = getUserId();
+    const currentToken = getToken();
+
+    if (!currentUserId || !currentToken) {
+      throw new Error("User not authenticated. Please log in again.");
+    }
+
     const dto: CreateLeadDTO = {
       user: {
         firstName: newLeadData.firstName,
@@ -311,36 +320,59 @@ const citiesList = selectedState
         },
       },
     };
-    return await apiRequest<CreateLeadDTO>("/register/user", {
+
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/register/user`, {
       method: "POST",
-      body: dto,
-      headers: { Authorization: `Bearer ${currentToken}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentToken}`,
+      },
+      body: JSON.stringify(dto),
     });
+
+    // Try to parse JSON, fallback to text if not JSON
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = await response.text();
+    }
+
+    // Extract message from various possible response formats
+    const message =
+      (typeof data === "object" && (data?.message || data?.detail || data?.error)) ||
+      (typeof data === "string" && data) ||
+      `Server responded with status ${response.status}`;
+
+    if (!response.ok) {
+      throw new Error(message);
+    }
+
+    return { message };
   },
-  onSuccess: () => {
+
+  onSuccess: (data) => {
     const currentUserId = getUserId();
-    
-    // Close dialog
     onOpenChange(false);
-    
-    // Invalidate the leads cache - this will trigger a refetch
+
     if (currentUserId) {
       queryClient.invalidateQueries({ queryKey: ["leads", currentUserId] });
     }
 
-    // Show success toast
     toast({
       title: "Success",
-      description: "Lead created successfully!",
+      description: data?.message || "Lead created successfully!",
+      variant: "success",
     });
 
-    // Reset form
     leadForm.reset();
   },
+
   onError: (err: any) => {
+    console.error("Create Lead Error:", err);
     toast({
       title: "Error",
-      description: err.message || "Failed to create lead",
+      description: err.message || "Something went wrong. Please try again.",
       variant: "destructive",
     });
   },
@@ -386,27 +418,284 @@ const citiesList = selectedState
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <AnimatePresence>
-        {open && (
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-transparent border-none p-0">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <GlassCard gradient="neutral" blur="xl" className="p-8">
-                <DialogHeader className="space-y-4 mb-6">
-                  <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent">
-                    Create New Project & Lead
-                  </DialogTitle>
-                  <DialogDescription className="text-center text-gray-300">
-                    Add a new project to your portfolio or create a new lead for
-                    your telecallers
-                  </DialogDescription>
-                </DialogHeader>
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <AnimatePresence>
+      {open && (
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-transparent border-none p-0">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <GlassCard gradient="neutral" blur="xl" className="p-8">
+              <DialogHeader className="space-y-4 mb-6">
+                <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent">
+                  {userRole === "SALES" ? "Add New Lead" : "Create New Project & Lead"}
+                </DialogTitle>
+                <DialogDescription className="text-center text-gray-300">
+                  {userRole === "SALES" 
+                    ? "Create a new lead for follow-up"
+                    : "Add a new project to your portfolio or create a new lead for your telecallers"}
+                </DialogDescription>
+              </DialogHeader>
 
+              {userRole === "SALES" ? (
+                // For sales: Show only lead form without tabs
+                <div className="space-y-6 mt-6">
+                  <Form {...leadForm}>
+                    <form
+                      onSubmit={leadForm.handleSubmit(onLeadSubmit)}
+                      className="space-y-6"
+                    >
+                      <motion.div
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="space-y-6"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={leadForm.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white flex items-center">
+                                  <Users className="h-4 w-4 mr-2" />
+                                  First Name
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g., John"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={leadForm.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Last Name
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g., Doe"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={leadForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white flex items-center">
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  Email Address
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="john.doe@example.com"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={leadForm.control}
+                            name="phoneNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white flex items-center">
+                                  <Phone className="h-4 w-4 mr-2" />
+                                  Phone Number
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="9876543210"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-white text-lg font-medium flex items-center">
+                            <Home className="h-5 w-5 mr-2" />
+                            Address Information
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={leadForm.control}
+                              name="country"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Country
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="India"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                      {...field}
+                                      readOnly
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={leadForm.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    State
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(val) => {
+                                      field.onChange(val);
+                                      setSelectedState(val);
+                                    }}
+                                    value={field.value || ""}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                        <SelectValue placeholder="Select state" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {statesList.map((state) => (
+                                        <SelectItem
+                                          key={state.isoCode}
+                                          value={state.isoCode}
+                                        >
+                                          {state.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={leadForm.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    City
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || ""}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                        <SelectValue placeholder="Select city" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {citiesList.map((city) => (
+                                        <SelectItem
+                                          key={city.name}
+                                          value={city.name}
+                                        >
+                                          {city.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={leadForm.control}
+                              name="pincode"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    Pincode
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="462001"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={leadForm.control}
+                            name="addressLine1"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-white">
+                                  Address Line
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="123 ABC Tower, MP Nagar"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </motion.div>
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => onOpenChange(false)}
+                          className="border-white/20 text-blue hover:bg-white/10"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={createLeadMutation.isPending}
+                          className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                        >
+                          {createLeadMutation.isPending
+                            ? "Creating..."
+                            : "Create Lead"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </div>
+              ) : (
+                // For others: Show tabs with both options
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
@@ -446,7 +735,6 @@ const citiesList = selectedState
                             name="projectName"
                             render={({ field }) => (
                               <FormItem>
-                                {" "}
                                 <FormLabel className="text-white flex items-center">
                                   <Building2 className="h-4 w-4 mr-2" />
                                   Project Name
@@ -454,7 +742,7 @@ const citiesList = selectedState
                                 <FormControl>
                                   <Input
                                     placeholder="e.g., Green Valley Residential Complex"
-                                    className="bg-white/10 border-white/20 text-white placeholder:text-white-900"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                     {...field}
                                   />
                                 </FormControl>
@@ -630,63 +918,73 @@ const citiesList = selectedState
                               )}
                             />
                             <FormField
-  control={projectForm.control}
-  name="state"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="text-white">State</FormLabel>
-      <Select
-        onValueChange={(val) => {
-          field.onChange(val);
-          setSelectedState(val); // update state for city dropdown
-        }}
-        value={field.value || ""}
-      >
-        <FormControl>
-          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-            <SelectValue placeholder="Select state" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {statesList.map((state) => (
-            <SelectItem key={state.isoCode} value={state.isoCode}>
-              {state.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                              control={projectForm.control}
+                              name="state"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    State
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(val) => {
+                                      field.onChange(val);
+                                      setSelectedState(val);
+                                    }}
+                                    value={field.value || ""}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                        <SelectValue placeholder="Select state" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {statesList.map((state) => (
+                                        <SelectItem
+                                          key={state.isoCode}
+                                          value={state.isoCode}
+                                        >
+                                          {state.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
-<FormField
-  control={projectForm.control}
-  name="city"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="text-white">City</FormLabel>
-      <Select
-        onValueChange={field.onChange}
-        value={field.value || ""}
-      >
-        <FormControl>
-          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-            <SelectValue placeholder="Select city" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {citiesList.map((city) => (
-            <SelectItem key={city.name} value={city.name}>
-              {city.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                            <FormField
+                              control={projectForm.control}
+                              name="city"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white">
+                                    City
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value || ""}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                        <SelectValue placeholder="Select city" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {citiesList.map((city) => (
+                                        <SelectItem
+                                          key={city.name}
+                                          value={city.name}
+                                        >
+                                          {city.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
                             <FormField
                               control={projectForm.control}
@@ -881,63 +1179,73 @@ const citiesList = selectedState
                                 )}
                               />
                               <FormField
-  control={leadForm.control}
-  name="state"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="text-white">State</FormLabel>
-      <Select
-        onValueChange={(val) => {
-          field.onChange(val);
-          setSelectedState(val);
-        }}
-        value={field.value || ""}
-      >
-        <FormControl>
-          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-            <SelectValue placeholder="Select state" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {statesList.map((state) => (
-            <SelectItem key={state.isoCode} value={state.isoCode}>
-              {state.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                                control={leadForm.control}
+                                name="state"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-white">
+                                      State
+                                    </FormLabel>
+                                    <Select
+                                      onValueChange={(val) => {
+                                        field.onChange(val);
+                                        setSelectedState(val);
+                                      }}
+                                      value={field.value || ""}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                          <SelectValue placeholder="Select state" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {statesList.map((state) => (
+                                          <SelectItem
+                                            key={state.isoCode}
+                                            value={state.isoCode}
+                                          >
+                                            {state.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-<FormField
-  control={leadForm.control}
-  name="city"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel className="text-white">City</FormLabel>
-      <Select
-        onValueChange={field.onChange}
-        value={field.value || ""}
-      >
-        <FormControl>
-          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-            <SelectValue placeholder="Select city" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          {citiesList.map((city) => (
-            <SelectItem key={city.name} value={city.name}>
-              {city.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                              <FormField
+                                control={leadForm.control}
+                                name="city"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-white">
+                                      City
+                                    </FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value || ""}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                          <SelectValue placeholder="Select city" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {citiesList.map((city) => (
+                                          <SelectItem
+                                            key={city.name}
+                                            value={city.name}
+                                          >
+                                            {city.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
                               <FormField
                                 control={leadForm.control}
@@ -1003,6 +1311,7 @@ const citiesList = selectedState
                     </Form>
                   </TabsContent>
                 </Tabs>
+              )}
               </GlassCard>
             </motion.div>
           </DialogContent>

@@ -116,6 +116,14 @@ export function EnhancedRoleBasedNavbar({
           { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];
+      case "sales":
+        return [
+          { path: "/sales", label: "Sales Dashboard", icon: Home },
+          { path: "/sales-leads", label: "My Leads", icon: Target },
+          // { path: "/leads", label: "My Leads", icon: Target },
+          { path: "/upload", label: "Upload Docs", icon: Upload },
+          ...baseItems,
+        ];
       default:
         return [
           { path: "/dashboard", label: "Dashboard", icon: Home },
@@ -142,6 +150,8 @@ export function EnhancedRoleBasedNavbar({
         return "bg-orange-500/20 text-orange-100 border-orange-500/30";
       case "telecaller":
         return "bg-cyan-500/30 text-black border-cyan-500/30";
+      case "sales":
+        return "bg-red-500/30 text-black border-white-500/30";
       default:
         return "bg-gray-500/20 text-black border-gray-500/30";
     }

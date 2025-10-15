@@ -11,7 +11,9 @@ type UserRole =
   | "telecaller"
   | "broker"
   | "ca"
-  | "user";
+  | "user"
+  | "sales"
+  ;
 
 const OAuth = () => {
   const [, setLocation] = useLocation();
@@ -26,6 +28,7 @@ const OAuth = () => {
       broker: "/broker",
       ca: "/ca/portfolio",
       user: "/dashboard",
+      sales: "/sales",
     };
 
     const normalizedRole = role.toLowerCase();
