@@ -341,9 +341,6 @@ export function FileUploadPage() {
                           <p className="text-white font-medium truncate">
                             {doc.fileName}
                           </p>
-                          <p className="text-gray-400 text-sm">
-                            File ID: {doc.fileId}
-                          </p>
                         </div>
                         <div
                           className={`px-3 py-1 text-xs rounded-full border ${

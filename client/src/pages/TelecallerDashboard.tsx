@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Phone, Target, CheckCircle, TrendingUp, Award } from "lucide-react";
+import { Phone, Target, CheckCircle, TrendingUp, Award, Pencil } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +8,40 @@ import { Progress } from "@/components/ui/progress";
 import { EnhancedRoleBasedNavbar } from "@/components/layout/EnhancedRoleBasedNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import type { Lead } from "@/types/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const LOAN_STATUS_OPTIONS = [
+  { value: "IN_PROCESS", label: "In Process" },
+  { value: "DOCUMENTS_PENDING", label: "Documents Pending" },
+  { value: "DOCUMENTS_RECEIVED", label: "Documents Received" },
+  { value: "UNDER_REVIEW", label: "Under Review" },
+  { value: "LOGIN_WITH_BANK", label: "Login with Bank" },
+  { value: "SOFT_SANCTIONED", label: "Soft Sanctioned" },
+  { value: "TECHNICAL_APPROVAL", label: "Technical Approval" },
+  { value: "LEGAL_APPROVAL", label: "Legal Approval" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "DISBURSED", label: "Disbursed" },
+  { value: "PART_DISBURSED", label: "Partially Disbursed" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "CLOSED", label: "Closed" },
+  { value: "ON_HOLD", label: "On Hold" },
+];
 
 export default function TelecallerDashboard() {
   const { user, logout } = useAuth();
   const token = localStorage.getItem("auth_token");
   const telecallerId = user?.userId;
 
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [editingStatus, setEditingStatus] = useState<string>("");
   const [activeTab, setActiveTab] = useState("overview");
   const [showAllLeads, setShowAllLeads] = useState(false);
   const [allLeads, setAllLeads] = useState<Lead[]>([]);
@@ -47,6 +75,97 @@ export default function TelecallerDashboard() {
       gradient: "from-purple-500/20 to-pink-500/20",
     },
   ]);
+  const updateLeadMutation = useMutation({
+    mutationFn: async ({
+      leadId,
+      data,
+    }: {
+      leadId: string;
+      data: UpdateLeadFormData;
+    }) => {
+      const token = localStorage.getItem("auth_token");
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+      const params = new URLSearchParams();
+      params.append("leadId", leadId);
+      params.append("status", data.status);
+      params.append("source", "telecaller");
+
+      const url = `${baseUrl}/leads/updateStatus?${params.toString()}`;
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      let responseData;
+      try {
+        responseData = await response.clone().json();
+      } catch {
+        responseData = await response.text();
+      }
+
+      // throw error for non-2xx responses
+      if (!response.ok) {
+        const message =
+          (typeof responseData === "object" &&
+            (responseData?.message ||
+              responseData?.detail ||
+              responseData?.error)) ||
+          (typeof responseData === "string" && responseData) ||
+          `Server responded with status ${response.status}`;
+        throw new Error(message);
+      }
+
+      return responseData;
+    },
+    onSuccess: async (data) => {
+      toast({
+        title: "Success",
+        description:
+          typeof data === "string"
+            ? data
+            : data?.message ||
+              data?.detail ||
+              data?.error ||
+              "Operation successful.",
+      });
+      await fetchAllLeads();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description:
+          error?.message ||
+          error?.response?.data?.message ||
+          "Something went wrong.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusColor = (status: string) => {
+    const lowerStatus = status?.toLowerCase() || "default";
+    const statuses: { [key: string]: string } = {
+      in_process: "bg-blue-700 text-white border-blue-800",
+      documents_pending: "bg-teal-700 text-white border-teal-800",
+      documents_received: "bg-blue-600 text-white border-blue-700",
+      under_review: "bg-teal-600 text-white border-teal-700",
+      login_with_bank: "bg-blue-800 text-white border-blue-900",
+      soft_sanctioned: "bg-teal-800 text-white border-teal-900",
+      technical_approval: "bg-teal-900 text-white border-black",
+      legal_approval: "bg-red-700 text-white border-red-800",
+      approved: "bg-blue-700 text-white border-blue-800",
+      disbursed: "bg-teal-700 text-white border-teal-800",
+      part_disbursed: "bg-blue-700 text-white border-blue-800",
+      rejected: "bg-red-700 text-white border-red-800",
+      closed: "bg-black text-white border-gray-900",
+      on_hold: "bg-slate-800 text-white border-black",
+      default: "bg-gray-800 text-white border-black",
+    };
+    return statuses[lowerStatus] || statuses.default;
+  };
 
   const fetchAllLeads = async () => {
     if (!telecallerId) return;
@@ -276,7 +395,7 @@ export default function TelecallerDashboard() {
           <GlassCard
             gradient="neutral"
             blur="md"
-            className="p-6 w-full max-w-4xl space-y-4"
+            className="p-6 w-full space-y-4"
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-black">All Leads</h3>
@@ -312,17 +431,57 @@ export default function TelecallerDashboard() {
                           {lead.firstName} {lead.lastName}
                         </p>
                       </div>
-                      <Badge
-                        variant={
-                          lead.leadStatus === "TELECALLER_ASSIGNED"
-                            ? "secondary"
-                            : lead.leadStatus === "COMPLETED"
-                              ? "success"
-                              : "outline"
-                        }
-                      >
-                        {lead.leadStatus}
-                      </Badge>
+                          <div className="flex items-center gap-2">
+                            {editingLeadId === lead.leadId ? (
+                              <Select
+                                value={editingStatus}
+                                onValueChange={(newStatus) => {
+                                  setEditingStatus(newStatus);
+                                  updateLeadMutation.mutate({
+                                    leadId: lead.leadId,
+                                    data: { status: newStatus },
+                                  });
+                                  setEditingLeadId(null);
+                                }}
+                              >
+                                <SelectTrigger className="w-32 h-8 bg-black/10 border-white/20 text-black text-xs">
+                                  <SelectValue placeholder="Change status" />
+                                </SelectTrigger>
+                                <SelectContent className="text-xs">
+                                  {LOAN_STATUS_OPTIONS.map((option) => (
+                                    <SelectItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge
+                                className={getStatusColor(lead.leadStatus)}
+                              >
+                                {lead.leadStatus || "N/A"}
+                              </Badge>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6 p-0 ml-1"
+                              onClick={() => {
+                                if (editingLeadId === lead.leadId) {
+                                  setEditingLeadId(null);
+                                } else {
+                                  setEditingLeadId(lead.leadId);
+                                  setEditingStatus(lead.leadStatus || "");
+                                }
+                              }}
+                            >
+                              <Pencil size={14} />
+                            </Button>
+                          </div>
+                        
                     </div>
 
                     <div className="text-sm text-gray-800 grid grid-cols-1 md:grid-cols-2 gap-y-1">

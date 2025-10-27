@@ -51,51 +51,61 @@ export function Settings() {
   const handleSave = async (section: string) => {
     try {
       if (section === "Security") {
-        if (
-          !settings.security.currentPassword ||
-          !settings.security.newPassword ||
-          !settings.security.confirmPassword
-        ) {
-          toast({
-            title: "Error",
-            description: "Please fill in all password fields",
-            variant: "destructive",
-          });
-          return;
-        }
+  localStorage.setItem("session_timeout", settings.security.sessionTimeout);
 
-        if (
-          settings.security.newPassword !== settings.security.confirmPassword
-        ) {
-          toast({
-            title: "Error",
-            description: "Passwords do not match",
-            variant: "destructive",
-          });
-          return;
-        }
+  if (
+    !settings.security.currentPassword &&
+    !settings.security.newPassword &&
+    !settings.security.confirmPassword
+  ) {
+    toast({
+      title: "Session Timeout Updated",
+      description: `Your session will now expire after ${settings.security.sessionTimeout} minutes.`,
+    });
 
-        //update password
-        await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/reset-password?email=${encodeURIComponent(
-            user?.email || ""
-          )}&newPassword=${encodeURIComponent(
-            settings.security.newPassword
-          )}&currentPassword=${encodeURIComponent(
-            settings.security.currentPassword
-          )}&source=web`,
-          {
-            email: user?.email,
-            newPassword: settings.security.newPassword,
-            source: "web",
-          }
-        );
+    return;
+  }
 
-        toast({
-          title: "Password Updated",
-          description: "Your password has been successfully updated.",
-        });
-      } else {
+  if (
+    !settings.security.currentPassword ||
+    !settings.security.newPassword ||
+    !settings.security.confirmPassword
+  ) {
+    toast({
+      title: "Error",
+      description: "Please fill all password fields to update password.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (settings.security.newPassword !== settings.security.confirmPassword) {
+    toast({
+      title: "Error",
+      description: "New passwords do not match.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  await axios.post(
+    `${import.meta.env.VITE_BASE_URL}/reset-password?email=${encodeURIComponent(
+      user?.email || ""
+    )}&newPassword=${encodeURIComponent(
+      settings.security.newPassword
+    )}&currentPassword=${encodeURIComponent(
+      settings.security.currentPassword
+    )}&source=web`
+  );
+
+  toast({
+    title: "Password Updated",
+    description: "Your password has been successfully updated.",
+  });
+
+  return;
+}
+ else {
         toast({
           title: "Settings saved",
           description: `${section} settings have been updated successfully.`,

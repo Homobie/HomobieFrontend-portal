@@ -1,26 +1,46 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
-// MODIFICATION: Added FileBadge icon for RERA ID
-import { Mail, User, Phone, Building, ArrowRight, Check, MapPin, FileBadge } from "lucide-react";
+import {
+  Mail,
+  User,
+  Phone,
+  Building,
+  ArrowRight,
+  Check,
+  MapPin,
+  FileBadge,
+} from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GlassButton } from "@/components/ui/glass-button";
 import { GlassBackground } from "@/components/layout/GlassBackground";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import HomobieLogo from "/attached_assets/wmremove-transformed_-_Edited-removebg-preview.png";
 import { Country, State, City } from "country-state-city";
 
 const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-// MODIFICATION: Added reraId to the FormData type
 type FormData = {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  roleType: "USER" | "BUILDER" | "BROKER" | "CA" | "ADMIN" | "TELECALLER" | "SALES";
+  roleType:
+    | "USER"
+    | "BUILDER"
+    | "BROKER"
+    | "CA"
+    | "ADMIN"
+    | "TELECALLER"
+    | "SALES";
   companyName: string;
   reraId: string;
   country: string;
@@ -29,48 +49,51 @@ type FormData = {
   pincode: string;
   addressLine1: string;
   shift?: "Morning" | "Evening" | "Night";
+  aadharNumber?: string;
+  panNumber?: string;
 };
-
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   // MODIFICATION: Initialized reraId in the component's state
   const [formData, setFormData] = useState<FormData>({
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNumber: "",
-  roleType: "USER",
-  companyName: "",
-  reraId: "",
-  country: "",
-  state: "",
-  city: "",
-  pincode: "",
-  addressLine1: "",
-  shift: "Morning", 
-});
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    roleType: "USER",
+    companyName: "",
+    reraId: "",
+    country: "",
+    state: "",
+    city: "",
+    pincode: "",
+    addressLine1: "",
+    shift: "Morning",
+    aadharNumber: "",
+    panNumber: "",
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleRoleChange = (value: FormData['roleType']) => {
-    setFormData(prev => ({
+  const handleRoleChange = (value: FormData["roleType"]) => {
+    setFormData((prev) => ({
       ...prev,
       roleType: value,
       // Reset builder-specific fields if role changes from builder
-      companyName: value === 'BUILDER' ? prev.companyName : '',
-      reraId: value === 'BUILDER' ? prev.reraId : '',
-      shift: value === 'TELECALLER' ? prev.shift : undefined,
+      companyName: value === "BUILDER" ? prev.companyName : "",
+      reraId: value === "BUILDER" ? prev.reraId : "",
+      shift: value === "TELECALLER" ? prev.shift : undefined,
     }));
   };
 
@@ -87,58 +110,60 @@ export default function Register() {
     try {
       // MODIFICATION: Added reraId to the submission payload for Builders
       const registrationData = {
-  user: {
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    email: formData.email,
-    phoneNumber: formData.phoneNumber
-  },
-  roleData: {
-    roleType: formData.roleType,
-    ...(formData.roleType === "BUILDER" ? {
-      companyName: formData.companyName,
-      reraId: formData.reraId,
-      location: {
-        country: formData.country,
-        state: formData.state,
-        city: formData.city,
-        pincode: formData.pincode,
-        addressLine1: formData.addressLine1
-      }
-    } : formData.roleType === "TELECALLER" ? {
-      shift: formData.shift,
-      location: {
-        country: formData.country,
-        state: formData.state,
-        city: formData.city,
-        pincode: formData.pincode,
-        addressLine1: formData.addressLine1
-      }
-    } : {
-      location: {
-        country: formData.country,
-        state: formData.state,
-        city: formData.city,
-        pincode: formData.pincode,
-        addressLine1: formData.addressLine1
-      }
-    })
-  }
-};
-
-      console.log(
-        registrationData
-      )
-      const response = await fetch(`${API_BASE_URL}/register/user`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        user: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
         },
-        body: JSON.stringify(registrationData)
+        roleData: {
+          roleType: formData.roleType,
+          ...(formData.roleType === "BUILDER"
+            ? {
+                companyName: formData.companyName,
+                reraId: formData.reraId,
+                location: {
+                  country: formData.country,
+                  state: formData.state,
+                  city: formData.city,
+                  pincode: formData.pincode,
+                  addressLine1: formData.addressLine1,
+                },
+              }
+            : formData.roleType === "TELECALLER"
+              ? {
+                  shift: formData.shift,
+                  location: {
+                    country: formData.country,
+                    state: formData.state,
+                    city: formData.city,
+                    pincode: formData.pincode,
+                    addressLine1: formData.addressLine1,
+                  },
+                }
+              : {
+                  location: {
+                    country: formData.country,
+                    state: formData.state,
+                    city: formData.city,
+                    pincode: formData.pincode,
+                    addressLine1: formData.addressLine1,
+                  },
+                }),
+        },
+      };
+
+      console.log(registrationData);
+      const response = await fetch(`${API_BASE_URL}/register/user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registrationData),
       });
 
       if (!response.ok) {
-        throw new Error('Registration failed');
+        throw new Error("Registration failed");
       }
 
       toast({
@@ -150,7 +175,8 @@ export default function Register() {
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -229,15 +255,23 @@ export default function Register() {
             <div className="flex items-center justify-between">
               {[1, 2].map((step) => (
                 <div key={step} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${currentStep >= step
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 border-blue-500 text-white'
-                    : 'border-gray-300 text-gray-400 dark:border-gray-600 dark:text-gray-500'
-                    }`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
+                      currentStep >= step
+                        ? "bg-gradient-to-br from-blue-500 to-purple-600 border-blue-500 text-white"
+                        : "border-gray-300 text-gray-400 dark:border-gray-600 dark:text-gray-500"
+                    }`}
+                  >
                     {currentStep > step ? <Check className="w-4 h-4" /> : step}
                   </div>
                   {step < 2 && (
-                    <div className={`w-16 h-0.5 mx-2 transition-all ${currentStep > step ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                      }`} />
+                    <div
+                      className={`w-16 h-0.5 mx-2 transition-all ${
+                        currentStep > step
+                          ? "bg-blue-500"
+                          : "bg-gray-300 dark:bg-gray-600"
+                      }`}
+                    />
                   )}
                 </div>
               ))}
@@ -357,40 +391,87 @@ export default function Register() {
                     </SelectContent>
                   </Select>
                 </div>
-{formData.roleType === 'TELECALLER' && (
-  <div className="space-y-2">
-    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-      Shift
-    </label>
-    <Select
-      value={formData.shift}
-      onValueChange={(value) =>
-        setFormData((prev) => ({ ...prev, shift: value as FormData['shift'] }))
-      }
-    >
-      <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400">
-        <SelectValue placeholder="Select Shift" />
-      </SelectTrigger>
-      <SelectContent>
-         <SelectItem value="MORNING">
-                                        Morning
-                                      </SelectItem>
-                                      <SelectItem value="EVENING">
-                                        Evening
-                                      </SelectItem>
-                                      <SelectItem value="NIGHT">
-                                        Night
-                                      </SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-)}
-
-                {/* MODIFICATION: Conditionally render Company Name and RERA ID fields */}
-                {formData.roleType === 'BUILDER' && (
+                {formData.roleType === "USER" && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="space-y-4 overflow-hidden"
+                  >
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Aadhar Number
+                      </label>
+                      <div className="relative">
+                        <FileBadge className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Input
+                          type="text"
+                          name="aadharNumber"
+                          value={formData.aadharNumber}
+                          onChange={handleChange}
+                          placeholder="Enter your 12-digit Aadhar number"
+                          className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
+                          required
+                          pattern="\d{12}"
+                          title="Aadhar number must be 12 digits"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        PAN Number
+                      </label>
+                      <div className="relative">
+                        <FileBadge className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Input
+                          type="text"
+                          name="panNumber"
+                          value={formData.panNumber}
+                          onChange={handleChange}
+                          placeholder="ABCDE1234F"
+                          className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
+                          required
+                          pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                          title="PAN format: 5 letters, 4 digits, 1 letter (e.g., ABCDE1234F)"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {formData.roleType === "TELECALLER" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Shift
+                    </label>
+                    <Select
+                      value={formData.shift}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          shift: value as FormData["shift"],
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400">
+                        <SelectValue placeholder="Select Shift" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MORNING">Morning</SelectItem>
+                        <SelectItem value="EVENING">Evening</SelectItem>
+                        <SelectItem value="NIGHT">Night</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* MODIFICATION: Conditionally render Company Name and RERA ID fields */}
+                {formData.roleType === "BUILDER" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.4 }}
                     className="space-y-4 overflow-hidden"
@@ -457,7 +538,7 @@ export default function Register() {
                           ...prev,
                           country: value,
                           state: "",
-                          city: ""
+                          city: "",
                         }));
                       }}
                     >
@@ -484,7 +565,7 @@ export default function Register() {
                         setFormData((prev) => ({
                           ...prev,
                           state: value,
-                          city: ""
+                          city: "",
                         }));
                       }}
                       disabled={!formData.country}
@@ -518,7 +599,10 @@ export default function Register() {
                       <SelectValue placeholder="Select City" />
                     </SelectTrigger>
                     <SelectContent>
-                      {City.getCitiesOfState(formData.country, formData.state).map((ct) => (
+                      {City.getCitiesOfState(
+                        formData.country,
+                        formData.state
+                      ).map((ct) => (
                         <SelectItem key={ct.name} value={ct.name}>
                           {ct.name}
                         </SelectItem>
@@ -594,9 +678,25 @@ export default function Register() {
                 >
                   {isLoading ? (
                     <div className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       Creating Account...
                     </div>

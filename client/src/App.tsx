@@ -26,6 +26,7 @@ import { Tracking } from "@/pages/Tracking";
 import Analytics from "@/pages/Analytics";
 import { Settings } from "@/pages/Settings";
 import GlassLogin from "@/pages/GlassLogin";
+import { useFixedSessionTimer } from "@/hooks/useFixedSessionTimer";
 import Register from "@/pages/Register";
 import NotFound from "@/pages/not-found";
 import { CRMIntegrationStatus } from "@/components/dashboard/CRMIntegrationStatus";
@@ -177,6 +178,7 @@ function RoleBasedRedirectWrapper() {
  * Main app router
  */
 function AppRouter() {
+   useFixedSessionTimer();
   return (
     <Switch>
       {/* Public */}

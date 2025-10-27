@@ -120,7 +120,7 @@ export function EnhancedRoleBasedNavbar({
         return [
           { path: "/sales", label: "Sales Dashboard", icon: Home },
           { path: "/sales-leads", label: "My Leads", icon: Target },
-          // { path: "/leads", label: "My Leads", icon: Target },
+          { path: "/bank-recommendation", label: "Bank Recommendation", icon: FileText },
           { path: "/upload", label: "Upload Docs", icon: Upload },
           ...baseItems,
         ];

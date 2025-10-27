@@ -76,11 +76,11 @@ interface LeadDetailsResponse {
   lastName: string;
   phoneNumber: string;
   location: LocationResponse;
-  loanStatus: string;
+  leadStatus: string;
 }
 
 const updateLeadSchema = z.object({
-  loanStatus: z.string().min(1, "Status is required"),
+  leadStatus: z.string().min(1, "Status is required"),
 });
 
 type UpdateLeadFormData = z.infer<typeof updateLeadSchema>;
@@ -191,7 +191,7 @@ export default function LeadManagement() {
 
   const handleEditOpen = (lead: LeadDetailsResponse) => {
     setEditingLead(lead);
-    editForm.reset({ loanStatus: lead.loanStatus });
+    editForm.reset({ leadStatus: lead.leadStatus });
   };
 
   const onUpdateSubmit = (data: UpdateLeadFormData) => {
@@ -339,8 +339,8 @@ export default function LeadManagement() {
                           {formatAddress(lead.location)}
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(lead.loanStatus)}>
-                            {lead.loanStatus || "N/A"}
+                          <Badge className={getStatusColor(lead.leadStatus)}>
+                            {lead.leadStatus || "N/A"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
@@ -421,8 +421,8 @@ export default function LeadManagement() {
               <p>
                 <ShieldCheck className="inline mr-2" />
                 <strong>Status:</strong>{" "}
-                <Badge className={getStatusColor(viewingLead.loanStatus)}>
-                  {viewingLead.loanStatus}
+                <Badge className={getStatusColor(viewingLead.leadStatus)}>
+                  {viewingLead.leadStatus}
                 </Badge>
               </p>
             </div>
@@ -446,7 +446,7 @@ export default function LeadManagement() {
             >
               <FormField
                 control={editForm.control}
-                name="loanStatus"
+                name="leadStatus"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Loan Status</FormLabel>

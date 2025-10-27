@@ -17,6 +17,7 @@ import {
   Users,
   Mail,
   Home,
+  Pencil,
 } from "lucide-react";
 
 import { GlassCard } from "@/components/ui/glass-card";
@@ -59,8 +60,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
-// ### Data Structures ###
-
 interface LocationResponse {
   addressLine1: string;
   addressLine2: string | null;
@@ -76,7 +75,7 @@ interface LeadDetailsResponse {
   lastName: string;
   phoneNumber: string;
   location: LocationResponse;
-  loanStatus: string;
+  leadStatus: string;
 }
 
 interface CreateLeadDTO {
@@ -98,6 +97,22 @@ interface CreateLeadDTO {
     };
   };
 }
+const LOAN_STATUS_OPTIONS = [
+  { value: "IN_PROCESS", label: "In Process" },
+  { value: "DOCUMENTS_PENDING", label: "Documents Pending" },
+  { value: "DOCUMENTS_RECEIVED", label: "Documents Received" },
+  { value: "UNDER_REVIEW", label: "Under Review" },
+  { value: "LOGIN_WITH_BANK", label: "Login with Bank" },
+  { value: "SOFT_SANCTIONED", label: "Soft Sanctioned" },
+  { value: "TECHNICAL_APPROVAL", label: "Technical Approval" },
+  { value: "LEGAL_APPROVAL", label: "Legal Approval" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "DISBURSED", label: "Disbursed" },
+  { value: "PART_DISBURSED", label: "Partially Disbursed" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "CLOSED", label: "Closed" },
+  { value: "ON_HOLD", label: "On Hold" },
+];
 
 const createLeadSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -109,28 +124,36 @@ const createLeadSchema = z.object({
   city: z.string().min(1, "City is required"),
   pincode: z.string().min(6, "Valid pincode is required"),
   addressLine1: z.string().min(1, "Address is required"),
+  aadharNumber: z
+    .string()
+    .length(12, "Aadhar number must be 12 digits")
+    .regex(/^\d{12}$/, "Aadhar number must contain only digits"),
+  panNumber: z
+    .string()
+    .length(10, "PAN number must be 10 characters")
+    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, "Invalid PAN number format"),
 });
 
 type CreateLeadFormData = z.infer<typeof createLeadSchema>;
 
 const updateLeadSchema = z.object({
-  loanStatus: z.string().min(1, "Status is required"),
+  status: z.string().min(1, "Status is required"),
 });
 
 type UpdateLeadFormData = z.infer<typeof updateLeadSchema>;
-
-// ### Main Component ###
 
 export default function SalesLead() {
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // ### State Management ###
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [editingStatus, setEditingStatus] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingLead, setEditingLead] = useState<LeadDetailsResponse | null>(null);
-  const [viewingLead, setViewingLead] = useState<LeadDetailsResponse | null>(null);
+  const [viewingLead, setViewingLead] = useState<LeadDetailsResponse | null>(
+    null
+  );
   const [selectedCountry, setSelectedCountry] = useState("IN");
   const [selectedState, setSelectedState] = useState("");
 
@@ -139,7 +162,6 @@ export default function SalesLead() {
     ? City.getCitiesOfState(selectedCountry, selectedState)
     : [];
 
-  // ### Data Fetching ###
   const { data: leads = [], isLoading } = useQuery<LeadDetailsResponse[]>({
     queryKey: ["leads", user?.userId],
     queryFn: async () => {
@@ -148,7 +170,10 @@ export default function SalesLead() {
 
       try {
         const response = await apiRequest(`/leads/get/${user.userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Access-Control-Allow-Origin": "*",
+          },
         });
         return Array.isArray(response) ? response : [];
       } catch (error) {
@@ -163,7 +188,6 @@ export default function SalesLead() {
     enabled: !!user?.userId,
   });
 
-  // Client-side filtering
   const filteredLeads = leads.filter(
     (lead) =>
       `${lead.firstName} ${lead.lastName}`
@@ -172,7 +196,6 @@ export default function SalesLead() {
       lead.phoneNumber.includes(searchTerm)
   );
 
-  // ### Create Lead Mutation ###
   const createLeadMutation = useMutation({
     mutationFn: async (newLeadData: CreateLeadFormData) => {
       const currentUserId = user?.userId;
@@ -256,7 +279,6 @@ export default function SalesLead() {
     },
   });
 
-  // ### Update Lead Mutation ###
   const updateLeadMutation = useMutation({
     mutationFn: async ({
       leadId,
@@ -266,27 +288,65 @@ export default function SalesLead() {
       data: UpdateLeadFormData;
     }) => {
       const token = localStorage.getItem("auth_token");
-      return await apiRequest(`/leads/${leadId}/status`, {
+      const baseUrl = import.meta.env.VITE_BASE_URL;
+      const params = new URLSearchParams();
+      params.append("leadId", leadId);
+      params.append("status", data.status);
+
+      const url = `${baseUrl}/leads/updateStatus?${params.toString()}`;
+
+      const response = await fetch(url, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: data,
       });
+
+      let responseData;
+      try {
+        responseData = await response.clone().json();
+      } catch {
+        responseData = await response.text();
+      }
+
+      // throw error for non-2xx responses
+      if (!response.ok) {
+        const message =
+          (typeof responseData === "object" &&
+            (responseData?.message ||
+              responseData?.detail ||
+              responseData?.error)) ||
+          (typeof responseData === "string" && responseData) ||
+          `Server responded with status ${response.status}`;
+        throw new Error(message);
+      }
+
+      return responseData;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      // Invalidate and refetch leads to show updated status
+      await queryClient.invalidateQueries({
+        queryKey: ["leads", user?.userId],
+      });
+
       toast({
         title: "Success",
-        description: "Lead status updated successfully!",
+        description:
+          typeof data === "string"
+            ? data
+            : data?.message ||
+              data?.detail ||
+              data?.error ||
+              "Status updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["leads"] });
-      setEditingLead(null);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update lead.",
+        description:
+          error?.message ||
+          error?.response?.data?.message ||
+          "Something went wrong.",
         variant: "destructive",
       });
     },
@@ -312,19 +372,8 @@ export default function SalesLead() {
     resolver: zodResolver(updateLeadSchema),
   });
 
-  const handleEditOpen = (lead: LeadDetailsResponse) => {
-    setEditingLead(lead);
-    editForm.reset({ loanStatus: lead.loanStatus });
-  };
-
   const onCreateSubmit = (data: CreateLeadFormData) => {
     createLeadMutation.mutate(data);
-  };
-
-  const onUpdateSubmit = (data: UpdateLeadFormData) => {
-    if (editingLead) {
-      updateLeadMutation.mutate({ leadId: editingLead.leadId, data });
-    }
   };
 
   // ### Helper Functions ###
@@ -341,10 +390,23 @@ export default function SalesLead() {
   const getStatusColor = (status: string) => {
     const lowerStatus = status?.toLowerCase() || "default";
     const statuses: { [key: string]: string } = {
-      new: "bg-blue-500/20 text-blue-100 border-blue-500/30",
-      contacted: "bg-yellow-500/20 text-yellow-100 border-yellow-500/30",
-      approved: "bg-emerald-500/20 text-emerald-100 border-emerald-500/30",
+      in_process: "bg-blue-500/20 text-blue-100 border-blue-500/30",
+      documents_pending:
+        "bg-yellow-500/20 text-yellow-100 border-yellow-500/30",
+      documents_received: "bg-cyan-500/20 text-cyan-100 border-cyan-500/30",
+      under_review: "bg-purple-500/20 text-purple-100 border-purple-500/30",
+      login_with_bank: "bg-indigo-500/20 text-indigo-100 border-indigo-500/30",
+      soft_sanctioned:
+        "bg-emerald-500/20 text-emerald-100 border-emerald-500/30",
+      technical_approval:
+        "bg-orange-500/20 text-orange-100 border-orange-500/30",
+      legal_approval: "bg-rose-500/20 text-rose-100 border-rose-500/30",
+      approved: "bg-green-500/20 text-green-100 border-green-500/30",
+      disbursed: "bg-lime-500/20 text-lime-100 border-lime-500/30",
+      part_disbursed: "bg-amber-500/20 text-amber-100 border-amber-500/30",
       rejected: "bg-red-500/20 text-red-100 border-red-500/30",
+      closed: "bg-gray-500/20 text-gray-100 border-gray-500/30",
+      on_hold: "bg-slate-500/20 text-slate-100 border-slate-500/30",
       default: "bg-gray-500/20 text-gray-100 border-gray-500/30",
     };
     return statuses[lowerStatus] || statuses.default;
@@ -362,7 +424,7 @@ export default function SalesLead() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black-900 to-slate-900 relative overflow-y-auto">
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 
       <EnhancedRoleBasedNavbar user={user} onLogout={logout} />
@@ -458,9 +520,56 @@ export default function SalesLead() {
                           {formatAddress(lead.location)}
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(lead.loanStatus)}>
-                            {lead.loanStatus || "N/A"}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            {editingLeadId === lead.leadId ? (
+                              <Select
+                                value={editingStatus}
+                                onValueChange={(newStatus) => {
+                                  setEditingStatus(newStatus);
+                                  updateLeadMutation.mutate({
+                                    leadId: lead.leadId,
+                                    data: { status: newStatus },
+                                  });
+                                  setEditingLeadId(null);
+                                }}
+                              >
+                                <SelectTrigger className="w-32 h-8 bg-black/10 border-white/20 text-black text-xs">
+                                  <SelectValue placeholder="Change status" />
+                                </SelectTrigger>
+                                <SelectContent className="text-xs">
+                                  {LOAN_STATUS_OPTIONS.map((option) => (
+                                    <SelectItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge
+                                className={getStatusColor(lead.leadStatus)}
+                              >
+                                {lead.leadStatus || "N/A"}
+                              </Badge>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-6 w-6 p-0 ml-1"
+                              onClick={() => {
+                                if (editingLeadId === lead.leadId) {
+                                  setEditingLeadId(null);
+                                } else {
+                                  setEditingLeadId(lead.leadId);
+                                  setEditingStatus(lead.leadStatus || "");
+                                }
+                              }}
+                            >
+                              <Pencil size={14} />
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -483,7 +592,7 @@ export default function SalesLead() {
       </motion.div>
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] bg-transparent border-none p-0">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-transparent border-none p-0">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -504,214 +613,267 @@ export default function SalesLead() {
                   onSubmit={createForm.handleSubmit(onCreateSubmit)}
                   className="space-y-6"
                 >
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={createForm.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white flex items-center">
-                          <Users className="h-4 w-4 mr-2" />
-                          First Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., John"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={createForm.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Last Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Doe"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={createForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white flex items-center">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Email Address
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="john.doe@example.com"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={createForm.control}
-                    name="phoneNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white flex items-center">
-                          <Phone className="h-4 w-4 mr-2" />
-                          Phone Number
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="9876543210"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-white text-lg font-medium flex items-center">
-                    <Home className="h-5 w-5 mr-2" />
-                    Address Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={createForm.control}
-                      name="country"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">Country</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="India"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                              {...field}
-                              readOnly
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={createForm.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">State</FormLabel>
-                          <Select
-                            onValueChange={(val) => {
-                              field.onChange(val);
-                              setSelectedState(val);
-                            }}
-                            value={field.value || ""}
-                          >
+                  <motion.div
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-6"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={createForm.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white flex items-center">
+                              <Users className="h-4 w-4 mr-2" />
+                              First Name
+                            </FormLabel>
                             <FormControl>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                <SelectValue placeholder="Select state" />
-                              </SelectTrigger>
+                              <Input
+                                placeholder="e.g., John"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
                             </FormControl>
-                            <SelectContent>
-                              {statesList.map((state) => (
-                                <SelectItem
-                                  key={state.isoCode}
-                                  value={state.isoCode}
-                                >
-                                  {state.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={createForm.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">City</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""}
-                          >
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">
+                              Last Name
+                            </FormLabel>
                             <FormControl>
-                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                                <SelectValue placeholder="Select city" />
-                              </SelectTrigger>
+                              <Input
+                                placeholder="e.g., Doe"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
                             </FormControl>
-                            <SelectContent>
-                              {citiesList.map((city) => (
-                                <SelectItem key={city.name} value={city.name}>
-                                  {city.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={createForm.control}
-                      name="pincode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-white">Pincode</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="462001"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={createForm.control}
-                    name="addressLine1"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">
-                          Address Line
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="123 ABC Tower, MP Nagar"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white flex items-center">
+                              <Mail className="h-4 w-4 mr-2" />
+                              Email Address
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="john.doe@example.com"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white flex items-center">
+                              <Phone className="h-4 w-4 mr-2" />
+                              Phone Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="9876543210"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <h3 className="text-white text-lg font-medium flex items-center">
+                        <Home className="h-5 w-5 mr-2" />
+                        Address Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">
+                                Country
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="India"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                  {...field}
+                                  readOnly
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">
+                                State
+                              </FormLabel>
+                              <Select
+                                onValueChange={(val) => {
+                                  field.onChange(val);
+                                  setSelectedState(val);
+                                }}
+                                value={field.value || ""}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                    <SelectValue placeholder="Select state" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {statesList.map((state) => (
+                                    <SelectItem
+                                      key={state.isoCode}
+                                      value={state.isoCode}
+                                    >
+                                      {state.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">City</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || ""}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                    <SelectValue placeholder="Select city" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {citiesList.map((city) => (
+                                    <SelectItem
+                                      key={city.name}
+                                      value={city.name}
+                                    >
+                                      {city.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="pincode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-white">
+                                Pincode
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="462001"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={createForm.control}
+                        name="addressLine1"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">
+                              Address Line
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="123 ABC Tower, MP Nagar"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="aadharNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">
+                              Aadhar Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="123456789012"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createForm.control}
+                        name="panNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">
+                              PAN Number
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="ABCDE1234F"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 uppercase"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(e.target.value.toUpperCase())
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </motion.div>
                   <DialogFooter>
                     <Button
@@ -727,7 +889,9 @@ export default function SalesLead() {
                       disabled={createLeadMutation.isPending}
                       className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
                     >
-                      {createLeadMutation.isPending ? "Creating..." : "Create Lead"}
+                      {createLeadMutation.isPending
+                        ? "Creating..."
+                        : "Create Lead"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -741,7 +905,7 @@ export default function SalesLead() {
       <Dialog open={!!viewingLead} onOpenChange={() => setViewingLead(null)}>
         <DialogContent className="bg-slate-800/95 border-white/20 text-white">
           <DialogHeader>
-            <DialogTitle>Lead Details</DialogTitle>
+            <DialogTitle className="text-white">Lead Details</DialogTitle>
             <DialogDescription className="text-gray-300">
               Full information for {viewingLead?.firstName}{" "}
               {viewingLead?.lastName}.
@@ -765,74 +929,12 @@ export default function SalesLead() {
               <p>
                 <ShieldCheck className="inline mr-2" />
                 <strong>Status:</strong>{" "}
-                <Badge className={getStatusColor(viewingLead.loanStatus)}>
-                  {viewingLead.loanStatus}
+                <Badge className={getStatusColor(viewingLead.leadStatus)}>
+                  {viewingLead.leadStatus}
                 </Badge>
               </p>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Lead Dialog */}
-      <Dialog open={!!editingLead} onOpenChange={() => setEditingLead(null)}>
-        <DialogContent className="bg-slate-800/95 border-white/20 text-white">
-          <DialogHeader>
-            <DialogTitle>Edit Lead Status</DialogTitle>
-            <DialogDescription className="text-gray-300">
-              Update the loan status for {editingLead?.firstName}.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...editForm}>
-            <form
-              onSubmit={editForm.handleSubmit(onUpdateSubmit)}
-              className="space-y-6 py-4"
-            >
-              <FormField
-                control={editForm.control}
-                name="loanStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Loan Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                          <SelectValue placeholder="Select a status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="New">New</SelectItem>
-                        <SelectItem value="Contacted">Contacted</SelectItem>
-                        <SelectItem value="Approved">Approved</SelectItem>
-                        <SelectItem value="Rejected">Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditingLead(null)}
-                  className="border-white/20 text-white hover:bg-white/10"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={updateLeadMutation.isPending}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
-                >
-                  {updateLeadMutation.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
         </DialogContent>
       </Dialog>
     </div>

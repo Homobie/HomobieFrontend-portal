@@ -22,8 +22,7 @@ type UserRole =
   | "broker"
   | "ca"
   | "user"
-  | "sales"
-  ;
+  | "sales";
 
 export default function GlassLogin() {
   const [, setLocation] = useLocation();
@@ -42,15 +41,13 @@ export default function GlassLogin() {
   // ADDED: State for the "Remember me" checkbox
   const [rememberMe, setRememberMe] = useState(false);
 
-
-  // ADDED: useEffect to check for a remembered username on component load
   useEffect(() => {
-    const rememberedUsername = localStorage.getItem('rememberedUsername');
+    const rememberedUsername = localStorage.getItem("rememberedUsername");
     if (rememberedUsername) {
       setFormData((prev) => ({ ...prev, username: rememberedUsername }));
       setRememberMe(true);
     }
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +67,11 @@ export default function GlassLogin() {
       });
 
       if ("email" in response) {
-        // ADDED: Logic to save or remove username based on the "Remember me" checkbox
+         localStorage.setItem("session_start", Date.now().toString());
         if (rememberMe) {
-          localStorage.setItem('rememberedUsername', formData.username);
+          localStorage.setItem("rememberedUsername", formData.username);
         } else {
-          localStorage.removeItem('rememberedUsername');
+          localStorage.removeItem("rememberedUsername");
         }
 
         toast({
@@ -112,25 +109,27 @@ export default function GlassLogin() {
   const handleLoginError = (err: any) => {
     console.error("Login error:", err);
 
-    let errorMessage = "Login failed. Please try again.";
+    let errorMessage = err?.response?.data?.message?.toString().trim() || null;
 
-    if (err?.response?.data?.message) {
-      errorMessage = err.response.data.message;
-    } else if (err?.message) {
-      if (
-        err.message.includes("credentials") ||
-        err.message.includes("Invalid")
-      ) {
-        errorMessage = "Invalid username or password";
-      } else if (
-        err.message.includes("network") ||
-        err.message.includes("fetch")
-      ) {
-        errorMessage = "Network error. Please check your connection.";
-      } else if (err.message.includes("timeout")) {
-        errorMessage = "Request timeout. Please try again.";
+    if (!errorMessage) {
+      if (err?.message) {
+        if (
+          err.message.includes("credentials") ||
+          err.message.includes("Invalid")
+        ) {
+          errorMessage = "Invalid username or password";
+        } else if (
+          err.message.includes("network") ||
+          err.message.includes("fetch")
+        ) {
+          errorMessage = "Network error. Please check your connection.";
+        } else if (err.message.includes("timeout")) {
+          errorMessage = "Request timeout. Please try again.";
+        } else {
+          errorMessage = err.message;
+        }
       } else {
-        errorMessage = err.message;
+        errorMessage = "Login failed. Please try again.";
       }
     }
 
@@ -341,9 +340,8 @@ export default function GlassLogin() {
                 )}
               </GlassButton>
             </div>
-                <OAuth/>
+            <OAuth />
           </motion.form>
-       
 
           {/* Sign Up Link */}
           <motion.div
