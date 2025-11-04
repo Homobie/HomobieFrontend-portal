@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 const BankRecommendation = () => {
-   const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({
@@ -50,7 +50,7 @@ const BankRecommendation = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [selectedBank, setSelectedBank] = useState(null);
-  
+  const [isLastPage, setIsLastPage] = useState(false);
 
   const bankTypes = ["PUBLIC", "PRIVATE", "NBFC"];
   const loanTypes = [
@@ -171,6 +171,7 @@ const BankRecommendation = () => {
 
       const data = await response.json();
       setBanks(data);
+      setIsLastPage(data.length < pagination.size);
     } catch (error) {
       console.error("Error fetching banks:", error);
       alert("Failed to fetch banks. Please Login to continue.");
@@ -286,10 +287,10 @@ const BankRecommendation = () => {
                   onChange={handleFileUpload}
                   className="hidden"
                 />
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-white/30 hover:text-gray-900 transition">
+                {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-white/30 hover:text-gray-900 transition">
                   <Upload size={20} />
                   <span>Upload Excel</span>
-                </div>
+                </div> */}
               </label>
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -430,44 +431,44 @@ const BankRecommendation = () => {
                 {
                   label: "Min Loan Amount (₹)",
                   key: "minLoanAmount",
-                  placeholder: "eg, 100000",
+                  placeholder: "eg. 100000",
                 },
                 {
                   label: "Max Loan Amount (₹)",
                   key: "maxLoanAmount",
-                  placeholder: "eg, 5000000",
+                  placeholder: "eg. 5000000",
                 },
                 {
                   label: "Min Interest Rate (%)",
                   key: "minInterestRate",
-                  placeholder: "eg, 4",
+                  placeholder: "eg. 4",
                 },
                 {
                   label: "Max Interest Rate (%)",
                   key: "maxInterestRate",
-                  placeholder: "eg, 8",
+                  placeholder: "eg. 8",
                 },
                 {
-                  label: "Max Tenure (months)",
+                  label: "Max Tenure (years)",
                   key: "maxTenure",
-                  placeholder: "eg, 240",
+                  placeholder: "eg. 30",
                 },
                 {
                   label: "Min Income Required (₹)",
                   key: "minIncomeRequired",
-                  placeholder: "eg, 50000",
+                  placeholder: "eg. 50000",
                 },
                 {
                   label: "Min CIBIL Score",
                   key: "minCibilScore",
-                  placeholder: "eg, 700",
+                  placeholder: "eg. 700",
                 },
-                { label: "Min Age", key: "minAge", placeholder: "eg, 21" },
-                { label: "Max Age", key: "maxAge", placeholder: "eg, 65" },
+                { label: "Min Age", key: "minAge", placeholder: "eg. 21" },
+                { label: "Max Age", key: "maxAge", placeholder: "eg. 65" },
                 {
                   label: "Min Turnover (₹)",
                   key: "minTurnover",
-                  placeholder: "eg, 1000000",
+                  placeholder: "eg. 1000000",
                 },
               ].map((field) => (
                 <div key={field.key}>
@@ -676,7 +677,8 @@ const BankRecommendation = () => {
                   onClick={() =>
                     setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
                   }
-                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-white text-gray-900 transition hover:backdrop-brightness-125"
+                  disabled={isLastPage || banks.length < pagination.size}
+                  className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 transition hover:backdrop-brightness-125"
                 >
                   Next
                 </button>

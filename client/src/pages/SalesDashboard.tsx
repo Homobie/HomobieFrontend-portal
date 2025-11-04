@@ -192,23 +192,23 @@ const SalesDashboard = () => {
   const getStatusColor = (status: string) => {
     const lowerStatus = status?.toLowerCase() || "default";
     const statuses: { [key: string]: string } = {
-      in_process: "bg-blue-500/20 text-blue-100 border-blue-500/30",
+      in_process: "bg-blue-500/20 text-black border-blue-500/30",
       documents_pending:
-        "bg-yellow-500/20 text-yellow-100 border-yellow-500/30",
-      documents_received: "bg-cyan-500/20 text-cyan-100 border-cyan-500/30",
-      under_review: "bg-purple-500/20 text-purple-100 border-purple-500/30",
-      login_with_bank: "bg-indigo-500/20 text-indigo-100 border-indigo-500/30",
+        "bg-yellow-500/20 text-black border-yellow-500/30",
+      documents_received: "bg-cyan-500/20 text-black border-cyan-500/30",
+      under_review: "bg-purple-500/20 text-black border-purple-500/30",
+      login_with_bank: "bg-indigo-500/20 text-black border-indigo-500/30",
       soft_sanctioned:
-        "bg-emerald-500/20 text-emerald-100 border-emerald-500/30",
+        "bg-emerald-500/20 text-black border-emerald-500/30",
       technical_approval:
-        "bg-orange-500/20 text-orange-100 border-orange-500/30",
-      legal_approval: "bg-rose-500/20 text-rose-100 border-rose-500/30",
-      approved: "bg-green-500/20 text-green-100 border-green-500/30",
-      disbursed: "bg-lime-500/20 text-lime-100 border-lime-500/30",
-      part_disbursed: "bg-amber-500/20 text-amber-100 border-amber-500/30",
-      rejected: "bg-red-500/20 text-red-100 border-red-500/30",
-      closed: "bg-gray-500/20 text-gray-100 border-gray-500/30",
-      on_hold: "bg-slate-500/20 text-slate-100 border-slate-500/30",
+        "bg-orange-500/20 text-black border-orange-500/30",
+      legal_approval: "bg-rose-500/20 text-black border-rose-500/30",
+      approved: "bg-green-500/20 text-black border-green-500/30",
+      disbursed: "bg-lime-500/20 text-black border-lime-500/30",
+      part_disbursed: "bg-amber-500/20 text-black border-amber-500/30",
+      rejected: "bg-red-500/20 text-black border-red-500/30",
+      closed: "bg-gray-500/20 text-black border-gray-500/30",
+      on_hold: "bg-slate-500/20 text-black border-slate-500/30",
       default: "bg-gray-500/20 text-black border-gray-500/30",
     };
     return statuses[lowerStatus] || statuses.default;
@@ -724,7 +724,7 @@ const SalesDashboard = () => {
                       required
                       disabled={isSubmitting}
                       className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white0 disabled:opacity-50 disabled:cursor-not-allowed"
-                      placeholder="9876543210"
+                      placeholder="Phone Number"
                     />
                   </div>
                   <div>
@@ -902,7 +902,7 @@ const SalesDashboard = () => {
       <Dialog open={!!viewingLead} onOpenChange={() => setViewingLead(null)}>
         <DialogContent className="bg-white border-white/20 text-black">
           <DialogHeader>
-            <DialogTitle className="text-white">Lead Details</DialogTitle>
+            <DialogTitle className="text-black">Lead Details</DialogTitle>
             <DialogDescription className="text-black">
               Full information for {viewingLead?.firstName}{" "}
               {viewingLead?.lastName}.

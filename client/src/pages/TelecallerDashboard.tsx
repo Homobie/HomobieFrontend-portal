@@ -148,21 +148,24 @@ export default function TelecallerDashboard() {
   const getStatusColor = (status: string) => {
     const lowerStatus = status?.toLowerCase() || "default";
     const statuses: { [key: string]: string } = {
-      in_process: "bg-blue-700 text-white border-blue-800",
-      documents_pending: "bg-teal-700 text-white border-teal-800",
-      documents_received: "bg-blue-600 text-white border-blue-700",
-      under_review: "bg-teal-600 text-white border-teal-700",
-      login_with_bank: "bg-blue-800 text-white border-blue-900",
-      soft_sanctioned: "bg-teal-800 text-white border-teal-900",
-      technical_approval: "bg-teal-900 text-white border-black",
-      legal_approval: "bg-red-700 text-white border-red-800",
-      approved: "bg-blue-700 text-white border-blue-800",
-      disbursed: "bg-teal-700 text-white border-teal-800",
-      part_disbursed: "bg-blue-700 text-white border-blue-800",
-      rejected: "bg-red-700 text-white border-red-800",
-      closed: "bg-black text-white border-gray-900",
-      on_hold: "bg-slate-800 text-white border-black",
-      default: "bg-gray-800 text-white border-black",
+      in_process: "bg-blue-500/20 text-black border-blue-500/30",
+      documents_pending:
+        "bg-yellow-500/20 text-black border-yellow-500/30",
+      documents_received: "bg-cyan-500/20 text-black border-cyan-500/30",
+      under_review: "bg-purple-500/20 text-black border-purple-500/30",
+      login_with_bank: "bg-indigo-500/20 text-black border-indigo-500/30",
+      soft_sanctioned:
+        "bg-emerald-500/20 text-black border-emerald-500/30",
+      technical_approval:
+        "bg-orange-500/20 text-black border-orange-500/30",
+      legal_approval: "bg-rose-500/20 text-black border-rose-500/30",
+      approved: "bg-green-500/20 text-black border-green-500/30",
+      disbursed: "bg-lime-500/20 text-black border-lime-500/30",
+      part_disbursed: "bg-amber-500/20 text-black border-amber-500/30",
+      rejected: "bg-red-500/20 text-black border-red-500/30",
+      closed: "bg-gray-500/20 text-black border-gray-500/30",
+      on_hold: "bg-slate-500/20 text-black border-slate-500/30",
+      default: "bg-gray-500/20 text-black border-gray-500/30",
     };
     return statuses[lowerStatus] || statuses.default;
   };

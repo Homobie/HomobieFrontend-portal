@@ -146,7 +146,7 @@ export function LeadManagementModal({
                   <Input
                     id="email"
                     type="email"
-                    placeholder="email@example.com"
+                    placeholder="Email"
                     {...register("email")}
                     className="mt-1 focus:ring-cred-mint border-gray-300"
                   />
@@ -159,7 +159,7 @@ export function LeadManagementModal({
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+91 98765 43210"
+                    placeholder="Phone Number"
                     {...register("phone")}
                     className="mt-1 focus:ring-cred-mint border-gray-300"
                   />

@@ -310,7 +310,7 @@ export default function Register() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
-                        placeholder="John"
+                        placeholder="First Name"
                         className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
                         required
                       />
@@ -326,7 +326,7 @@ export default function Register() {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      placeholder="Doe"
+                      placeholder="Last Name"
                       className="bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
                       required
                     />
@@ -344,7 +344,7 @@ export default function Register() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="john.doe@example.com"
+                      placeholder="Email Address"
                       className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
                       required
                     />
@@ -362,7 +362,7 @@ export default function Register() {
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      placeholder="1234567890"
+                      placeholder="Phone Number"
                       className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
                       required
                     />
@@ -386,8 +386,8 @@ export default function Register() {
                       <SelectItem value="BROKER">Broker</SelectItem>
                       <SelectItem value="CA">Chartered Accountant</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="TELECALLER">Lead Manager</SelectItem>
-                      <SelectItem value="SALES">Sales</SelectItem>
+                      {/* <SelectItem value="TELECALLER">Lead Manager</SelectItem>
+                      <SelectItem value="SALES">Sales</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -430,7 +430,7 @@ export default function Register() {
                           name="panNumber"
                           value={formData.panNumber}
                           onChange={handleChange}
-                          placeholder="ABCDE1234F"
+                          placeholder="Enter your PAN number"
                           className="pl-10 bg-white/20 border-white/30 backdrop-blur-sm focus:bg-white/30 focus:border-blue-400"
                           required
                           pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"

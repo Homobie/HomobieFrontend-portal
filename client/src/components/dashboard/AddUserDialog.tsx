@@ -182,7 +182,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="John"
+                          placeholder="Your First Name"
                           className="bg-white/10 border-white/20 text-white"
                           {...field}
                         />
@@ -200,7 +200,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                       <FormLabel className="text-white">Last Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Doe"
+                          placeholder="Your Last Name"
                           className="bg-white/10 border-white/20 text-white"
                           {...field}
                         />
@@ -223,7 +223,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="john.doe@example.com"
+                        placeholder="Your Email"
                         className="bg-white/10 border-white/20 text-white"
                         {...field}
                       />
@@ -242,7 +242,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                       <FormLabel className="text-white">Username</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="johndoe"
+                          placeholder="Username"
                           className="bg-white/10 border-white/20 text-white"
                           {...field}
                         />
@@ -263,7 +263,7 @@ export function AddUserDialog({ open, onOpenChange }: AddUserDialogProps) {
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="+91 98765 43210"
+                          placeholder="Your Phone Number"
                           className="bg-white/10 border-white/20 text-white"
                           {...field}
                         />

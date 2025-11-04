@@ -478,7 +478,7 @@ export function EnhancedCreateProjectDialog({
                                   </FormLabel>
                                   <FormControl>
                                     <Input
-                                      placeholder="e.g., John"
+                                      placeholder="First Name"
                                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                       {...field}
                                     />
@@ -497,7 +497,7 @@ export function EnhancedCreateProjectDialog({
                                   </FormLabel>
                                   <FormControl>
                                     <Input
-                                      placeholder="e.g., Doe"
+                                      placeholder="Last Name"
                                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                       {...field}
                                     />
@@ -518,7 +518,7 @@ export function EnhancedCreateProjectDialog({
                                   <FormControl>
                                     <Input
                                       type="email"
-                                      placeholder="john.doe@example.com"
+                                      placeholder="Email Address"
                                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                       {...field}
                                     />
@@ -538,7 +538,7 @@ export function EnhancedCreateProjectDialog({
                                   </FormLabel>
                                   <FormControl>
                                     <Input
-                                      placeholder="9876543210"
+                                      placeholder="Phone Number"
                                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                       {...field}
                                     />
@@ -1094,7 +1094,7 @@ export function EnhancedCreateProjectDialog({
                                     </FormLabel>
                                     <FormControl>
                                       <Input
-                                        placeholder="e.g., John"
+                                        placeholder="First Name"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />
@@ -1113,7 +1113,7 @@ export function EnhancedCreateProjectDialog({
                                     </FormLabel>
                                     <FormControl>
                                       <Input
-                                        placeholder="e.g., Doe"
+                                        placeholder="Last Name"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />
@@ -1134,7 +1134,7 @@ export function EnhancedCreateProjectDialog({
                                     <FormControl>
                                       <Input
                                         type="email"
-                                        placeholder="john.doe@example.com"
+                                        placeholder="Email Address"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />
@@ -1154,7 +1154,7 @@ export function EnhancedCreateProjectDialog({
                                     </FormLabel>
                                     <FormControl>
                                       <Input
-                                        placeholder="9876543210"
+                                        placeholder="Phone Number"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />
@@ -1308,7 +1308,7 @@ export function EnhancedCreateProjectDialog({
                                     </FormLabel>
                                     <FormControl>
                                       <Input
-                                        placeholder="123412341234"
+                                        placeholder="Enter Aadhar Number"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />
@@ -1328,7 +1328,7 @@ export function EnhancedCreateProjectDialog({
                                     </FormLabel>
                                     <FormControl>
                                       <Input
-                                        placeholder="ABCDE1234F"
+                                        placeholder="Enter PAN Number"
                                         className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
                                         {...field}
                                       />

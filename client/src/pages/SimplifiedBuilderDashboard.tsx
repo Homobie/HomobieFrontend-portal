@@ -131,16 +131,16 @@ export default function ThemedBuilderDashboard() {
       value: projects.filter((p) => p.status === "Active").length,
       icon: Building2,
     },
-    {
-      title: "Team Members",
-      value: telecallers.length,
-      icon: Users,
-    },
-    {
-      title: "Unassigned Leads",
-      value: leads.filter((l) => l.status === "new").length,
-      icon: Target,
-    },
+    // {
+    //   title: "Team Members",
+    //   value: telecallers.length,
+    //   icon: Users,
+    // },
+    // {
+    //   title: "Unassigned Leads",
+    //   value: leads.filter((l) => l.status === "new").length,
+    //   icon: Target,
+    // },
     {
       title: "Completed Projects",
       value: projects.filter((p) => p.status === "completed").length,
@@ -155,22 +155,22 @@ export default function ThemedBuilderDashboard() {
       icon: Building2,
       action: () => setShowCreateProject(true),
     },
-    {
-      title: "Add Team Member",
-      description: "Invite telecallers to your team.",
-      icon: Users,
-      action: () => setShowCreateTeam(true),
-    },
-    {
-      title: "Assign Leads",
-      description: "Distribute leads to your team.",
-      icon: Target,
-      action: () => {
-        const unassigned = leads.filter((l) => l.status === "new");
-        setSelectedLeads(unassigned);
-        setShowAssignLead(true);
-      },
-    },
+    // {
+    //   title: "Add Team Member",
+    //   description: "Invite telecallers to your team.",
+    //   icon: Users,
+    //   action: () => setShowCreateTeam(true),
+    // },
+    // {
+    //   title: "Assign Leads",
+    //   description: "Distribute leads to your team.",
+    //   icon: Target,
+    //   action: () => {
+    //     const unassigned = leads.filter((l) => l.status === "new");
+    //     setSelectedLeads(unassigned);
+    //     setShowAssignLead(true);
+    //   },
+    // },
   ];
 
   const formatLocation = (location: LocationResponse) => `${location.city}, ${location.state}`;
@@ -196,7 +196,7 @@ export default function ThemedBuilderDashboard() {
           }
           onLogout={logout}
         />
-        <main className="p-4 md:p-8 pt-20 md:pt-24 space-y-6">
+        <main className="p-4 md:p-8 pt-20 md:pt-[80px] space-y-6">
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -305,7 +305,7 @@ export default function ThemedBuilderDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              {/* <Card>
                 <CardHeader>
                   <CardTitle>Team Members</CardTitle>
                   <CardDescription>Your active telecaller team.</CardDescription>
@@ -328,7 +328,7 @@ export default function ThemedBuilderDashboard() {
                   ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           </div>
         </main>

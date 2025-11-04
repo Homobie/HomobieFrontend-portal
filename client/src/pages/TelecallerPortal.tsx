@@ -617,7 +617,7 @@ export default function TelecallerPortal() {
                   type="tel"
                   value={newUser.phone}
                   onChange={(e) => setNewUser(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="+91 98765 43210"
+                  placeholder="Enter phone number"
                   required
                   className="bg-white/20 border-white/30 backdrop-blur-sm"
                 />
