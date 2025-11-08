@@ -596,38 +596,50 @@ const BankRecommendation = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {banks.map((bank) => (
-                <div
-                  key={bank.bankId}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:backdrop-brightness-125 transition"
-                >
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white backdrop-blur-sm rounded-lg flex items-center justify-center transition hover:backdrop-brightness-125">
-                        <Building2 className="text-gray-900" size={24} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {bank.bankName}
-                        </h3>
-                        <p className="text-sm text-black">
-                          {bank.bankType} Bank
-                        </p>
-                        <p className="text-sm text-black">
-                          {bank.maxInterestRate}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSelectedBank(bank)}
-                      className="px-6 py-2 bg-gray-300 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-gray-500 hover:text-gray-900 transition"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+  {banks.map((bank) => (
+    <div
+      key={bank.bankId}
+      className="border border-gray-200 rounded-lg p-6 hover:shadow-lg hover:backdrop-brightness-125 transition"
+    >
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-white backdrop-blur-sm rounded-lg flex items-center justify-center transition hover:backdrop-brightness-125 overflow-hidden">
+            {bank.bankLogo ? (
+              <img
+                src={`data:image/png;base64,${bank.bankLogo}`}
+                alt={`${bank.bankName} logo`}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<svg class="text-gray-900" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M9 8h1"/><path d="M14 8h1"/><path d="M9 12h1"/><path d="M14 12h1"/><path d="M9 16h1"/><path d="M14 16h1"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>';
+                }}
+              />
+            ) : (
+              <Building2 className="text-gray-900" size={24} />
+            )}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {bank.bankName}
+            </h3>
+            <p className="text-sm text-black">
+              {bank.bankType} Bank
+            </p>
+            <p className="text-sm text-black">
+              {bank.maxInterestRate}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setSelectedBank(bank)}
+          className="px-6 py-2 bg-gray-300 backdrop-blur-sm text-gray-900 rounded-lg hover:bg-gray-500 hover:text-gray-900 transition"
+        >
+          View Details
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
           )}
 
           {/* Pagination */}

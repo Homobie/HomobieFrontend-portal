@@ -27,10 +27,10 @@ const ViewDetails = ({ bank, onClose }) => {
     }
   }, [bank?.bankId]);
   useEffect(() => {
-  if (selectedLoanType && bank?.bankId) {
-    fetchBankDetails();
-  }
-}, [selectedLoanType, bank?.bankId]);
+    if (selectedLoanType && bank?.bankId) {
+      fetchBankDetails();
+    }
+  }, [selectedLoanType, bank?.bankId]);
 
   const fetchAvailableLoanTypes = async () => {
     setLoadingLoanTypes(true);
@@ -61,32 +61,32 @@ const ViewDetails = ({ bank, onClose }) => {
   };
 
   const fetchBankDetails = async () => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("auth_token");
-    const response = await fetch(
-      `${import.meta.env.VITE_BASE_URL}/banks/policy?bankId=${bank.bankId}&loanType=${selectedLoanType}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/banks/policy?bankId=${bank.bankId}&loanType=${selectedLoanType}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      setBankDetails(data);
+    } catch (error) {
+      console.error("Error fetching bank details:", error);
+      alert("Failed to fetch bank details. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
-    setBankDetails(data);
-  } catch (error) {
-    console.error("Error fetching bank details:", error);
-    alert("Failed to fetch bank details. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   if (!bank) return null;
 
@@ -121,9 +121,9 @@ const ViewDetails = ({ bank, onClose }) => {
       .join(" ");
   };
 
-const displayBank = bankDetails 
-  ? { ...bankDetails, loanType: selectedLoanType }
-  : bank;
+  const displayBank = bankDetails
+    ? { ...bankDetails, loanType: selectedLoanType }
+    : bank;
 
   const detailSections = [
     {
@@ -230,8 +230,28 @@ const displayBank = bankDetails
         <div className="sticky top-0 z-10 bg-[#292727] backdrop-blur-md border-b border-white/20 p-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                <Building2 className="text-white" size={32} />
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center overflow-hidden">
+                {bank.bankLogo ? (
+                  <img
+                    src={`data:image/png;base64,${bank.bankLogo}`}
+                    alt={`${bank.bankName} logo`}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      console.error("Image failed to load for:", bank.bankName);
+                      e.target.style.display = "none";
+                      e.target.parentElement.innerHTML =
+                        '<svg class="text-white" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M9 8h1"/><path d="M14 8h1"/><path d="M9 12h1"/><path d="M14 12h1"/><path d="M9 16h1"/><path d="M14 16h1"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>';
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        "Image loaded successfully for:",
+                        bank.bankName
+                      );
+                    }}
+                  />
+                ) : (
+                  <Building2 className="text-white" size={32} />
+                )}
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -257,7 +277,9 @@ const displayBank = bankDetails
             {loadingLoanTypes ? (
               <div className="flex items-center gap-2 px-4 py-3 border border-white/20 rounded-lg bg-black/30">
                 <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span className="text-gray-300 text-sm">Loading loan types...</span>
+                <span className="text-gray-300 text-sm">
+                  Loading loan types...
+                </span>
               </div>
             ) : (
               <div className="relative">
@@ -268,8 +290,8 @@ const displayBank = bankDetails
                   disabled={availableLoanTypes.length === 0}
                 >
                   <option value="" className="bg-black/40 text-white">
-                    {availableLoanTypes.length === 0 
-                      ? "No loan types available" 
+                    {availableLoanTypes.length === 0
+                      ? "No loan types available"
                       : "Select a loan type"}
                   </option>
                   {availableLoanTypes.map((type) => (
