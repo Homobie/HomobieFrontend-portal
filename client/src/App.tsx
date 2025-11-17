@@ -48,6 +48,9 @@ import NotificationCenter from "@/pages/NotificationCenter";
 import AssignmentManagement from "@/pages/AssignmentManagement";
 import CallbackPage from "@/hooks/CallbackPage";
 import CompleteProfile from "@/pages/CompleteProfile";
+import Properties from "@/components/properties/properties";
+// Added Import for PropertyDetails
+import PropertyDetails from "@/components/properties/PropertyDetails"; 
 
 /**
  * Protected layout (with navbar, background, newsletter, chatbot, etc.)
@@ -199,6 +202,19 @@ function AppRouter() {
           <Dashboard />
         </ProtectedLayout>
       </Route>
+      
+      {/* Property Routes */}
+      <Route path="/properties">
+        <ProtectedLayout>
+          <Properties />
+        </ProtectedLayout>
+      </Route>
+      <Route path="/properties/:propertyId">
+        <ProtectedLayout>
+          <PropertyDetails />
+        </ProtectedLayout>
+      </Route>
+
       <Route path="/upload">
         <ProtectedLayout>
           <FileUploadPage />

@@ -26,7 +26,7 @@ const OAuth = () => {
       builder: "/builder",
       telecaller: "/telecaller",
       broker: "/broker",
-      ca: "/ca/portfolio",
+      ca: "/ca",
       user: "/dashboard",
       sales: "/sales",
     };

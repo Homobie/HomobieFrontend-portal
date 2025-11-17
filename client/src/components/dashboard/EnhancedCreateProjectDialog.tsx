@@ -156,8 +156,12 @@ export function EnhancedCreateProjectDialog({
   onOpenChange,
   userRole,
 }: EnhancedCreateProjectDialogProps) {
+  // Check if the user role requires the lead-only view
+  const leadOnlyRoles = ["SALES", "CA", "broker"];
+  const isLeadOnlyView = userRole ? leadOnlyRoles.includes(userRole) : false;
+
   const [activeTab, setActiveTab] = useState(
-    userRole === "SALES" ? "lead" : "project"
+    isLeadOnlyView ? "lead" : "project"
   );
   const [selectedCountry, setSelectedCountry] = useState("IN");
   const [selectedState, setSelectedState] = useState("");
@@ -200,6 +204,8 @@ export function EnhancedCreateProjectDialog({
       city: "",
       pincode: "",
       addressLine1: "",
+      aadharNumber: "", // Added default
+      panNumber: "", // Added default
     },
   });
 
@@ -441,19 +447,19 @@ export function EnhancedCreateProjectDialog({
               <GlassCard gradient="neutral" blur="xl" className="p-8">
                 <DialogHeader className="space-y-4 mb-6">
                   <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent">
-                    {userRole === "SALES"
+                    {isLeadOnlyView
                       ? "Add New Lead"
                       : "Create New Project & Lead"}
                   </DialogTitle>
                   <DialogDescription className="text-center text-gray-300">
-                    {userRole === "SALES"
+                    {isLeadOnlyView
                       ? "Create a new lead for follow-up"
                       : "Add a new project to your portfolio or create a new lead for your telecallers"}
                   </DialogDescription>
                 </DialogHeader>
 
-                {userRole === "SALES" ? (
-                  // For sales: Show only lead form without tabs
+                {isLeadOnlyView ? (
+                  // For lead-only roles: Show only lead form without tabs
                   <div className="space-y-6 mt-6">
                     <Form {...leadForm}>
                       <form
@@ -682,6 +688,49 @@ export function EnhancedCreateProjectDialog({
                                 </FormItem>
                               )}
                             />
+                            
+                            {/* --- FIELDS ADDED HERE --- */}
+                            <FormField
+                              control={leadForm.control}
+                              name="aadharNumber"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white flex items-center">
+                                    Aadhar Number
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter Aadhar Number"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={leadForm.control}
+                              name="panNumber"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-white flex items-center">
+                                    PAN Number
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter PAN Number"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            {/* --- END OF ADDED FIELDS --- */}
+
                           </div>
                         </motion.div>
                         <DialogFooter>
