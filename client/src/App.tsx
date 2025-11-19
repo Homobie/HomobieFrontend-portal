@@ -48,7 +48,7 @@ import NotificationCenter from "@/pages/NotificationCenter";
 import AssignmentManagement from "@/pages/AssignmentManagement";
 import CallbackPage from "@/hooks/CallbackPage";
 import CompleteProfile from "@/pages/CompleteProfile";
-import Properties from "@/components/properties/properties";
+import Properties from "@/components/properties/Properties";
 // Added Import for PropertyDetails
 import PropertyDetails from "@/components/properties/PropertyDetails"; 
 

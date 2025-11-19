@@ -9,22 +9,98 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Phone,
-  Mail,
-  Heart,
-  Share2,
-  Calendar,
-  Shield,
+  // Phone, // Unused in original
+  // Mail, // Unused in original
+  // Heart, // Unused in original
+  // Share2, // Unused in original
+  // Calendar, // Unused in original
+  // Shield, // Unused in original
   Eye,
 } from "lucide-react";
 import { useRoute } from "wouter";
 import { EnhancedRoleBasedNavbar } from "../layout/EnhancedRoleBasedNavbar";
 
+// --- Interfaces & Types ---
+
+interface LocationRaw {
+  addressLine1?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}
+
+interface PropertyRaw {
+  propertyId?: string;
+  title?: string;
+  description?: string;
+  actualPrice?: number;
+  discountPrice?: number;
+  areaSqft?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  type?: string;
+  category?: string;
+  status?: string;
+  furnishing?: string;
+  constructionStatus?: string;
+  location?: LocationRaw;
+  amenities?: string[];
+  propertyFeatures?: string[];
+  ownerName?: string;
+  // Image fields can be diverse based on logic
+  mediaFiles?: Record<string, any[]> | any[];
+  images?: any[];
+  imageUrls?: string[];
+  [key: string]: any; // Allow for other fields
+}
+
+interface ProcessedProperty {
+  id: string;
+  propertyId?: string;
+  title: string;
+  description: string;
+  actualPrice: number;
+  discountPrice: number;
+  areaSqft: number;
+  bedrooms: number;
+  bathrooms: number;
+  type: string;
+  category: string;
+  status: string;
+  furnishing: string;
+  constructionStatus: string;
+  location: {
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+  imageUrls: string[];
+  amenities: string[];
+  propertyFeatures: string[];
+  ownerName: string;
+}
+
+interface AuthTokenData {
+  token: string | null;
+  userId: string | null;
+  refreshToken: string | null;
+  userData: any | null;
+}
+
+interface PropertyImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  onClick?: () => void;
+  loading?: "lazy" | "eager";
+}
+
 // API Configuration
 const BASE_URL = `${import.meta.env.VITE_BASE_URL}`;
 
 // Debug function to analyze image data
-const debugImageData = (imageData, index = 0) => {
+const debugImageData = (imageData: any, index: number = 0) => {
   console.log(`=== DEBUG Image ${index} ===`);
   console.log("Type:", typeof imageData);
 
@@ -52,7 +128,7 @@ const debugImageData = (imageData, index = 0) => {
 };
 
 // Corrected image conversion function
-const convertImageDataToUrl = (imageData) => {
+const convertImageDataToUrl = (imageData: any): string | null => {
   if (!imageData) {
     console.warn("No image data provided");
     return null;
@@ -109,7 +185,9 @@ const convertImageDataToUrl = (imageData) => {
         else if (signature.startsWith("ffd8")) mimeType = "image/jpeg";
       }
 
-      const blob = new Blob([bytes], { type: mimeType });
+      // FIX: Cast to any to handle the ArrayBufferLike vs ArrayBuffer mismatch
+      const blob = new Blob([bytes as any], { type: mimeType });
+      
       // Create a local URL for the blob
       return URL.createObjectURL(blob);
     }
@@ -123,13 +201,13 @@ const convertImageDataToUrl = (imageData) => {
 };
 
 // Enhanced convertImageArrayToUrls with debugging
-const convertImageArrayToUrls = (imageArray) => {
+const convertImageArrayToUrls = (imageArray: any[]): string[] => {
   if (!imageArray || !Array.isArray(imageArray)) {
     console.warn("Invalid or missing image array");
     return [];
   }
 
-  const urls = [];
+  const urls: string[] = [];
 
   for (let i = 0; i < imageArray.length; i++) {
     const imgData = imageArray[i];
@@ -151,7 +229,7 @@ const convertImageArrayToUrls = (imageArray) => {
 };
 
 // API function to fetch individual property
-const fetchIndividualProperty = async (propertyId) => {
+const fetchIndividualProperty = async (propertyId: string): Promise<any> => {
   try {
     console.log(`Fetching property: ${propertyId}`);
 
@@ -188,7 +266,7 @@ const fetchIndividualProperty = async (propertyId) => {
 };
 
 // Process property data and convert images
-const processPropertyData = (rawData) => {
+const processPropertyData = (rawData: PropertyRaw): ProcessedProperty | null => {
   if (!rawData) {
     console.warn("No property data to process");
     return null;
@@ -197,7 +275,7 @@ const processPropertyData = (rawData) => {
   console.log("Processing property data:", rawData);
 
   // Convert images from various possible fields
-  let imageUrls = [];
+  let imageUrls: string[] = [];
 
   // Check different possible image fields
   // This will check rawData.images, then rawData.mediaFiles, etc.
@@ -214,7 +292,7 @@ const processPropertyData = (rawData) => {
     // e.g., { "PROPERTY_MEDIA_MAIN": [...], "PROPERTY_MEDIA_OTHERS": [...] }
     if (typeof source === "object" && !Array.isArray(source)) {
       console.log("Found images as an object/map. Extracting...");
-      const allImageByteArrays = [];
+      const allImageByteArrays: any[] = [];
 
       // Prioritize known keys
       if (Array.isArray(source["PROPERTY_MEDIA_MAIN"])) {
@@ -226,7 +304,7 @@ const processPropertyData = (rawData) => {
 
       // If no known keys found, just grab all valid arrays from the object's values
       if (allImageByteArrays.length === 0) {
-        Object.values(source).forEach((list) => {
+        Object.values(source).forEach((list: any) => {
           if (Array.isArray(list)) {
             allImageByteArrays.push(...list);
           }
@@ -257,7 +335,7 @@ const processPropertyData = (rawData) => {
   }
 
   // Structure the property data
-  const processedProperty = {
+  const processedProperty: ProcessedProperty = {
     // IDs
     id: rawData.propertyId || `temp-${Date.now()}`,
     propertyId: rawData.propertyId,
@@ -305,9 +383,15 @@ const processPropertyData = (rawData) => {
 };
 
 // Simple image component with onClick on all states
-const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
-  const [imageState, setImageState] = useState("loading");
-  const [imgRef, setImgRef] = useState(null);
+const PropertyImage: React.FC<PropertyImageProps> = ({
+  src,
+  alt,
+  className,
+  onClick,
+  loading = "lazy",
+}) => {
+  const [imageState, setImageState] = useState<"loading" | "error" | "loaded">("loading");
+  const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     if (!src) {
@@ -386,7 +470,8 @@ const PropertyImage = ({ src, alt, className, onClick, loading = "lazy" }) => {
     />
   );
 };
-const getAuthTokens = () => {
+
+const getAuthTokens = (): AuthTokenData => {
   const authUser = localStorage.getItem("auth_user");
   return {
     token: localStorage.getItem("auth_token"),
@@ -396,21 +481,21 @@ const getAuthTokens = () => {
   };
 };
 
-const PropertyDetail = () => {
+const PropertyDetail: React.FC = () => {
   const { userData: user } = getAuthTokens();
 
   const logout = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
-  const [match, params] = useRoute("/properties/:propertyId");
+  const [match, params] = useRoute<{ propertyId: string }>("/properties/:propertyId");
   const propertyIdFromUrl = params?.propertyId;
 
-  const [property, setProperty] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [showImageModal, setShowImageModal] = useState(false);
+  const [property, setProperty] = useState<ProcessedProperty | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [showImageModal, setShowImageModal] = useState<boolean>(false);
   // const [isFavorite, setIsFavorite] = useState(false);
 
   const goBack = () => {
@@ -458,15 +543,15 @@ const PropertyDetail = () => {
 
         // Handle favorites
         try {
-          const favorites = JSON.parse(
-            sessionStorage.getItem("favorites") || "[]"
-          );
+          // const favorites = JSON.parse(
+          //   sessionStorage.getItem("favorites") || "[]"
+          // );
           // Commented out to prevent crash
           // setIsFavorite(favorites.includes(propertyId));
         } catch {
           sessionStorage.setItem("favorites", "[]");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching property:", err);
         setError(err.message || "Failed to load property details");
       } finally {
@@ -488,8 +573,8 @@ const PropertyDetail = () => {
 
   const pricePerSqft = useMemo(() => {
     if (!property?.discountPrice && !property?.actualPrice) return 0;
-    const price = property.discountPrice || property.actualPrice;
-    if (!property.areaSqft) return 0;
+    const price = property.discountPrice || property.actualPrice || 0;
+    if (!property?.areaSqft) return 0;
     return Math.round(price / property.areaSqft);
   }, [property]);
 
@@ -512,6 +597,8 @@ const PropertyDetail = () => {
   // };
 
   const shareProperty = async () => {
+    if (!property) return;
+    
     const shareData = {
       title: property.title,
       text: `Check out this amazing property: ${property.title}`,
