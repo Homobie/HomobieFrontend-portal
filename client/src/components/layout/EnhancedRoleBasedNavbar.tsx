@@ -86,7 +86,9 @@ export function EnhancedRoleBasedNavbar({
       case "ca":
         return [
           { path: "/ca", label: "CA Dashboard", icon: Calculator },
+          { path: "/leads", label: "Client Management", icon: Users },
           { path: "/properties", label: "Property Management", icon: Home },
+
           ...baseItems,
         ];
       case "broker":
@@ -320,7 +322,10 @@ export function EnhancedRoleBasedNavbar({
 
               {/* Mobile Menu Button */}
               <div className="lg:hidden">
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
                     variant="ghost"
                     size="sm"

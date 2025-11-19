@@ -124,7 +124,7 @@ interface CreateProjectDTO {
   completedAt?: string;
 }
 
-// DTO structure for backend - Lead
+/// DTO structure for backend - Lead
 interface CreateLeadDTO {
   user: {
     firstName: string;
@@ -135,6 +135,8 @@ interface CreateLeadDTO {
   roleData: {
     roleType: "USER";
     addedByUserId: string;
+    aadharNumber: string;
+    panNumber: string;
     location: {
       country: string;
       state: string;
@@ -157,7 +159,7 @@ export function EnhancedCreateProjectDialog({
   userRole,
 }: EnhancedCreateProjectDialogProps) {
   // Check if the user role requires the lead-only view
-  const leadOnlyRoles = ["SALES", "CA", "broker"];
+  const leadOnlyRoles = ["SALES", "ca", "broker"];
   const isLeadOnlyView = userRole ? leadOnlyRoles.includes(userRole) : false;
 
   const [activeTab, setActiveTab] = useState(
@@ -323,6 +325,8 @@ export function EnhancedCreateProjectDialog({
         roleData: {
           roleType: "USER",
           addedByUserId: currentUserId,
+          aadharNumber: newLeadData.aadharNumber,
+          panNumber: newLeadData.panNumber,
           location: {
             country: newLeadData.country,
             state: newLeadData.state,
@@ -437,7 +441,7 @@ export function EnhancedCreateProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
         {open && (
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-transparent border-none p-0">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-transparent border-none p-0 mt-10">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
